@@ -18,8 +18,9 @@ public final class CellNameHelper {
         Matcher matcher = CELL_PATTERN.matcher(cellCoordinates);
         if(matcher.matches()){
             String columnName = matcher.group(1);
-            int rowNum = Integer.parseInt(matcher.group(2))+1;
-            return sheet.getRow(rowNum).getCell(convertColStringToIndex(columnName));
+            int rowNum = Integer.parseInt(matcher.group(2))-1;
+            int columnNum = convertColStringToIndex(columnName);
+            return sheet.getRow(rowNum).getCell(columnNum);
         }
         throw new IllegalArgumentException(String.format("%s is not a valid Cell Reference Name", cellCoordinates));
     }

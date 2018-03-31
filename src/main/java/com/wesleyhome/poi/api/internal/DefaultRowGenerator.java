@@ -3,23 +3,22 @@ package com.wesleyhome.poi.api.internal;
 import com.wesleyhome.poi.api.CellGenerator;
 import com.wesleyhome.poi.api.RowGenerator;
 import com.wesleyhome.poi.api.SheetGenerator;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-
-import java.util.Map;
-import java.util.TreeMap;
 
 public class DefaultRowGenerator implements RowGenerator {
     private final SheetGenerator sheetGenerator;
     private final int rowNum;
-    private int startColumn;
     private CellGenerator currentCell;
-    private int currentColumnNum;
-    private Map<Integer, CellGenerator> cells;
+    private ExtendedMap<Integer, DefaultCellGenerator> cells;
+    private int startColumn;
 
     public DefaultRowGenerator(SheetGenerator sheetGenerator, int rowNum) {
         this.sheetGenerator = sheetGenerator;
         this.rowNum = rowNum;
-        cells = new TreeMap<>();
+        this.cells = new ExtendedTreeMap<>();
+        this.startColumn = 0;
     }
 
     @Override
@@ -27,8 +26,7 @@ public class DefaultRowGenerator implements RowGenerator {
         if(!cells.isEmpty()){
             throw new IllegalArgumentException("Must call this before creating cells");
         }
-        startColumn = columnNum;
-        currentColumnNum = startColumn;
+        this.startColumn = columnNum;
         return this;
     }
 
@@ -54,7 +52,14 @@ public class DefaultRowGenerator implements RowGenerator {
 
     @Override
     public CellGenerator nextCell() {
-        return null;
+        return cell(getNextColumnNum());
+    }
+
+    private int getNextColumnNum() {
+        if(cells.isEmpty()){
+            return startColumn;
+        }
+        return cells.lastKey()+1;
     }
 
     @Override
@@ -64,11 +69,19 @@ public class DefaultRowGenerator implements RowGenerator {
 
     @Override
     public CellGenerator cell(int columnNum) {
-        return cells.getOrDefault(columnNum, new DefaultCellGenerator(this, columnNum));
+        return currentCell = cells.getOrDefault(columnNum, () -> new DefaultCellGenerator(this, columnNum));
     }
 
     @Override
     public CellStyleManager cellStyleManager() {
         return this.sheetGenerator.cellStyleManager();
+    }
+
+    public void applyRow(Sheet sheet) {
+        Row row = sheet.createRow(this.rowNum);
+        cells.values()
+            .forEach(cellGen -> {
+                cellGen.applyCell(row);
+            });
     }
 }

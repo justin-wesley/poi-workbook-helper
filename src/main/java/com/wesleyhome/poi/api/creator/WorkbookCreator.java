@@ -32,7 +32,8 @@ public interface WorkbookCreator {
         if(matcher.matches()) {
             String columnName = matcher.group(1);
             int rowNum = Integer.parseInt(matcher.group(2)) - 1;
-            return cell(convertColStringToIndex(columnName), rowNum);
+            int colNum = convertColStringToIndex(columnName);
+            return cell(colNum, rowNum);
         }
         throw new IllegalArgumentException(format("%s is not a valid Cell Reference Name", cellName));
     }

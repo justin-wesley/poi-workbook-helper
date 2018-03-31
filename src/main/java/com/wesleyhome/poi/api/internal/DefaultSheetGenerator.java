@@ -1,25 +1,23 @@
 package com.wesleyhome.poi.api.internal;
 
-import com.wesleyhome.poi.api.*;
+import com.wesleyhome.poi.api.CellGenerator;
+import com.wesleyhome.poi.api.RowGenerator;
+import com.wesleyhome.poi.api.SheetGenerator;
+import com.wesleyhome.poi.api.WorkbookGenerator;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class DefaultSheetGenerator implements SheetGenerator {
     private final WorkbookGenerator workbookGenerator;
     private String sheetName;
     private RowGenerator workingRow;
-    private final AtomicInteger currentRowNum;
     private int startRowNum = 0;
-    private final Map<Integer, RowGenerator> rows;
+    private final ExtendedMap<Integer, DefaultRowGenerator> rows;
 
     public DefaultSheetGenerator(WorkbookGenerator workbookGenerator, String sheetName) {
         this.workbookGenerator = workbookGenerator;
         this.sheetName = sheetName;
-        this.currentRowNum = new AtomicInteger();
-        this.rows = new TreeMap<>();
+        this.rows = new ExtendedTreeMap<>();
     }
 
     @Override
@@ -34,7 +32,6 @@ public class DefaultSheetGenerator implements SheetGenerator {
             throw new IllegalArgumentException("Rows have already been generated. This must be called before any rows are created");
         }
         startRowNum = rowNum;
-        currentRowNum.set(startRowNum);
         return this;
     }
 
@@ -50,18 +47,26 @@ public class DefaultSheetGenerator implements SheetGenerator {
 
     @Override
     public RowGenerator row(int rowNum) {
-        workingRow = rows.getOrDefault(rowNum, new DefaultRowGenerator(this, rowNum));
-        currentRowNum.set(rowNum);
-        return workingRow;
+        return workingRow = rows.getOrDefault(rowNum, () -> new DefaultRowGenerator(this, rowNum));
     }
 
     @Override
     public RowGenerator nextRow() {
-        return row(currentRowNum.incrementAndGet());
+        return row(getNextRowNum());
+    }
+
+    private int getNextRowNum() {
+        if(rows.isEmpty()){
+            return startRowNum;
+        }
+        return rows.lastKey()+1;
     }
 
     @Override
     public CellGenerator nextCell() {
+        if(workingRow == null){
+            return nextRow().nextCell();
+        }
         return workingRow.nextCell();
     }
 
@@ -73,5 +78,13 @@ public class DefaultSheetGenerator implements SheetGenerator {
     @Override
     public CellStyleManager cellStyleManager() {
         return this.workbookGenerator.cellStyleManager();
+    }
+
+    public void applySheet(Workbook workbook) {
+        Sheet sheet = workbook.createSheet(this.sheetName);
+        rows.values()
+            .forEach(rowGen -> {
+                rowGen.applyRow(sheet);
+            });
     }
 }

@@ -1,31 +1,37 @@
 package com.wesleyhome.poi.api;
 
-import com.wesleyhome.poi.api.assertions.WorkbookAssert;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.jupiter.api.Test;
 
-import java.util.function.Supplier;
-
 import static com.wesleyhome.poi.api.assertions.WorkbookAssert.assertThat;
-import static org.assertj.core.api.Assertions.assertThat;
 
 class WorkbookGeneratorTest {
 
     @Test
-    void createBasicWorkbookWithOneDefinedCell(){
-        Supplier<Workbook> supplier = () -> getWorkbook();
+    void createBasicWorkbook() {
 
-        assertThat(supplier).hasSheet("sheet0").cell("A1").hasValue("I am awesome").cell("A2");
+        assertThat(this.getBasicWorkbook()).hasSheet("Sheet1")
+            .cell("A1").hasValue("I am awesome")
+            .cell("B1").hasValue("You are awesome")
+            .cell("A2").hasValue("So are you!!!")
+            .cell("B2").hasValue("So am I!!!")
+            .cell("A3").hasValue("A3");
     }
 
-    private Workbook getWorkbook() {
+    private Workbook getBasicWorkbook() {
         return WorkbookGenerator
             .create()
-            .cell("A1")
+            .nextCell()
             .havingValue("I am awesome")
-            .cell("A2")
+            .nextCell()
+            .havingValue("You are awesome")
+            .nextRow()
+            .nextCell()
             .havingValue("So are you!!!")
+            .nextCell()
+            .havingValue("So am I!!!")
+            .cell("A3")
+            .havingValue("A3")
             .createWorkbook();
     }
 

@@ -1,33 +1,39 @@
 package com.wesleyhome.poi.api.internal;
 
-import com.wesleyhome.poi.api.*;
+import com.wesleyhome.poi.api.CellGenerator;
+import com.wesleyhome.poi.api.RowGenerator;
+import com.wesleyhome.poi.api.SheetGenerator;
+import com.wesleyhome.poi.api.WorkbookGenerator;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.WorkbookUtil;
-
-import java.util.Map;
-import java.util.TreeMap;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 public class DefaultWorkbookGenerator implements WorkbookGenerator {
 
     private final CellStyleManager cellStyleManager;
-    private Map<String, SheetGenerator> sheets;
+    private ExtendedMap<String, DefaultSheetGenerator> sheets;
     private SheetGenerator workingSheet;
 
     public DefaultWorkbookGenerator(){
-        sheets = new TreeMap<>();
+        sheets = new ExtendedTreeMap<>();
         this.cellStyleManager = new CellStyleManager();
     }
 
     @Override
     public SheetGenerator sheet(String sheetName) {
         String safeSheetName = WorkbookUtil.createSafeSheetName(sheetName);
-        workingSheet = sheets.getOrDefault(safeSheetName, new DefaultSheetGenerator(this, safeSheetName));
+        workingSheet = sheets.getOrDefault(safeSheetName, () -> new DefaultSheetGenerator(this, safeSheetName));
         return workingSheet;
     }
 
     @Override
     public Workbook createWorkbook() {
-        return null;
+        Workbook workbook = new SXSSFWorkbook();
+        sheets.values()
+            .forEach(sheetGen -> {
+                sheetGen.applySheet(workbook);
+            });
+        return workbook;
     }
 
     @Override
