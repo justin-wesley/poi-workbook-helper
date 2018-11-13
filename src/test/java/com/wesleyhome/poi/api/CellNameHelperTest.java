@@ -23,7 +23,7 @@ class CellNameHelperTest {
 
     @Test
     void convertToCellGoodValue(){
-        when(sheet.getRow(10001)).thenReturn(row);
+        when(sheet.getRow(9999)).thenReturn(row);
         when(row.getCell(CellReference.convertColStringToIndex("AA"))).thenReturn(cell);
         Cell aa10000 = CellNameHelper.convertToCell(sheet, "aa10000");
         assertThat(cell).isSameAs(aa10000);

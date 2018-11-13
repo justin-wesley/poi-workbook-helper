@@ -12,6 +12,18 @@
         <artifactId>parent</artifactId>
         <version>1.0.0</version>
     </parent>
+    <scm>
+        <connection>scm:git:https://github.com/justin-wesley/poi-workbook-helper.git</connection>
+        <developerConnection>scm:git:https://github.com/justin-wesley/poi-workbook-helper.git</developerConnection>
+        <url>https://github.com/justin-wesley/poi-workbook-helper.git</url>
+    </scm>
+    <distributionManagement>
+        <repository>
+            <id>bintray-justin-wesley-maven</id>
+            <name>justin-wesley-maven</name>
+            <url>https://api.bintray.com/maven/justin-wesley/maven/poi-workbook-helper/</url>
+        </repository>
+    </distributionManagement>
     <properties>
         <module.name>workbook.helper</module.name>
         <mockito.version>2.17.0</mockito.version>
