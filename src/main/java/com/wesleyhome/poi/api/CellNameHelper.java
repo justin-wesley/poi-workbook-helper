@@ -2,6 +2,7 @@ package com.wesleyhome.poi.api;
 
 import com.wesleyhome.poi.api.creator.WorkbookCreator;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
 import java.util.regex.Matcher;

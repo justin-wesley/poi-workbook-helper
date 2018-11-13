@@ -1,6 +1,9 @@
 package com.wesleyhome.poi.api.internal;
 
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellUtil;
+import org.apache.poi.ss.util.RegionUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +19,7 @@ public class CellStyleManager {
     private ExtendedMap<String, ExtendedCellStyle> styleMap;
     private ExtendedMap<Workbook, Map<ExtendedCellStyle, CellStyle>> cellStyles;
 
-    CellStyleManager(){
+    CellStyleManager() {
         styleMap = new ExtendedTreeMap<>();
         cellStyles = new ExtendedTreeMap<>(comparingInt(Object::hashCode));
     }
@@ -25,42 +28,76 @@ public class CellStyleManager {
         return styleMap.getOrDefault(cellStyle, new ExtendedCellStyle()).copy();
     }
 
-    CellStyle getCellStyle(Workbook workbook, ExtendedCellStyle cs) {
-        CellStyle cellStyle = cellStyles.getOrDefault(workbook, HashMap::new).get(cs);
-        if(cellStyle != null) {
-            IndexedColors backgroundColor = cs.getBackgroundColor();
-            IndexedColors bottomBorderColor = cs.getBottomBorderColor();
-            BorderStyle bottomBorderStyle = cs.getBottomBorderStyle();
-            String dataFormatString = cs.getDataFormatString();
-            IndexedColors fontColor = cs.getFontColor();
-            Integer fontHeightInPoints = cs.getFontHeightInPoints();
-            String fontName = cs.getFontName();
-            HorizontalAlignment horizontalAlignment = cs.getHorizontalAlignment();
-            IndexedColors leftBorderColor = cs.getLeftBorderColor();
-            BorderStyle leftBorderStyle = cs.getLeftBorderStyle();
-            IndexedColors rightBorderColor = cs.getRightBorderColor();
-            BorderStyle rightBorderStyle = cs.getRightBorderStyle();
-            IndexedColors topBorderColor = cs.getTopBorderColor();
-            BorderStyle topBorderStyle = cs.getTopBorderStyle();
-            VerticalAlignment verticalAlignment = cs.getVerticalAlignment();
-            boolean bold = cs.isBold();
-            boolean italic = cs.isItalic();
-            boolean wrappedText = cs.isWrappedText();
-            cellStyle = workbook.createCellStyle();
+    private void applyBackgroundColor(CellStyle cs1, Short index) {
+        cs1.setFillForegroundColor(index);
+        cs1.setFillPattern(SOLID_FOREGROUND);
+    }
+
+    private <T, U> void setProperty(T value, Function<T, U> supplier, Consumer<U> consumer) {
+        if (value != null) {
+            U apply = supplier.apply(value);
+            consumer.accept(apply);
+        }
+    }
+
+    private <T, U, P> void setProperty(P style, T value, Function<T, U> supplier, BiConsumer<P, U> consumer) {
+        if (value != null) {
+            U apply = supplier.apply(value);
+            consumer.accept(style, apply);
+        }
+    }
+
+    private <T> void setProperty(T value, Consumer<T> consumer) {
+        if (value != null) {
+            consumer.accept(value);
+        }
+    }
+
+    public void saveStyle(String cellStyleName, ExtendedCellStyle cellStyle) {
+        cellStyle.markImmutable();
+        styleMap.put(cellStyleName, cellStyle);
+    }
+
+    public void applyCellStyle(CellRangeAddress cellRangeAddress, Sheet sheet, ExtendedCellStyle cs) {
+        CellStyle cellStyle = getCellStyle(sheet.getWorkbook(), cs, false);
+        Cell cell = CellUtil.getCell(CellUtil.getRow(cellRangeAddress.getFirstRow(), sheet), cellRangeAddress.getFirstColumn());
+        cell.setCellStyle(cellStyle);
+        RegionUtil.setBottomBorderColor(cs.getBottomBorderColor().index, cellRangeAddress, sheet);
+        RegionUtil.setTopBorderColor(cs.getTopBorderColor().index, cellRangeAddress, sheet);
+        RegionUtil.setLeftBorderColor(cs.getLeftBorderColor().index, cellRangeAddress, sheet);
+        RegionUtil.setRightBorderColor(cs.getRightBorderColor().index, cellRangeAddress, sheet);
+        RegionUtil.setBorderLeft(cs.getLeftBorderStyle(), cellRangeAddress, sheet);
+        RegionUtil.setBorderRight(cs.getRightBorderStyle(), cellRangeAddress, sheet);
+        RegionUtil.setBorderBottom(cs.getBottomBorderStyle(), cellRangeAddress, sheet);
+        RegionUtil.setBorderTop(cs.getTopBorderStyle(), cellRangeAddress, sheet);
+    }
+
+    public void applyCellStyle(Cell cell, ExtendedCellStyle extendedCellStyle) {
+        CellStyle cellStyle = getCellStyle(cell.getRow().getSheet().getWorkbook(), extendedCellStyle, true);
+        cell.setCellStyle(cellStyle);
+    }
+
+
+    private CellStyle getCellStyle(Workbook workbook, ExtendedCellStyle ecs, boolean applyBorder) {
+        Map<ExtendedCellStyle, CellStyle> extendCSMap = cellStyles.computeIfAbsent(workbook, wb -> new HashMap<>());
+        CellStyle cs = extendCSMap.computeIfAbsent(ecs, cs1 -> {
+            CellStyle cellStyle = workbook.createCellStyle();
+            IndexedColors backgroundColor = ecs.getBackgroundColor();
+            Integer dataFormat = ecs.getDataFormat();
+            IndexedColors fontColor = ecs.getFontColor();
+            Integer fontHeightInPoints = ecs.getFontHeightInPoints();
+            String fontName = ecs.getFontName();
+            HorizontalAlignment horizontalAlignment = ecs.getHorizontalAlignment();
+            VerticalAlignment verticalAlignment = ecs.getVerticalAlignment();
+            boolean bold = ecs.isBold();
+            boolean italic = ecs.isItalic();
+            boolean wrappedText = ecs.isWrappedText();
             setProperty(cellStyle, backgroundColor, IndexedColors::getIndex, this::applyBackgroundColor);
-            setProperty(bottomBorderColor, IndexedColors::getIndex, cellStyle::setBottomBorderColor);
-            setProperty(bottomBorderStyle, cellStyle::setBorderBottom);
-            setProperty(topBorderColor, IndexedColors::getIndex, cellStyle::setTopBorderColor);
-            setProperty(topBorderStyle, cellStyle::setBorderTop);
-            setProperty(rightBorderColor, IndexedColors::getIndex, cellStyle::setRightBorderColor);
-            setProperty(rightBorderStyle, cellStyle::setBorderRight);
-            setProperty(leftBorderColor, IndexedColors::getIndex, cellStyle::setLeftBorderColor);
-            setProperty(leftBorderStyle, cellStyle::setBorderLeft);
             setProperty(verticalAlignment, cellStyle::setVerticalAlignment);
             setProperty(horizontalAlignment, cellStyle::setAlignment);
-            setProperty(dataFormatString, fmt -> workbook.createDataFormat().getFormat(fmt), cellStyle::setDataFormat);
+            setProperty(dataFormat, Integer::shortValue, cellStyle::setDataFormat);
             cellStyle.setWrapText(wrappedText);
-            if(fontColor != null || fontHeightInPoints != null || fontName != null || bold || italic){
+            if (fontColor != null || fontHeightInPoints != null || fontName != null || bold || italic) {
                 Font font = workbook.createFont();
                 setProperty(fontColor, IndexedColors::getIndex, font::setColor);
                 setProperty(fontHeightInPoints, Integer::shortValue, font::setFontHeightInPoints);
@@ -69,38 +106,27 @@ public class CellStyleManager {
                 font.setItalic(italic);
                 cellStyle.setFont(font);
             }
+            return cellStyle;
+        });
+        if (applyBorder) {
+            IndexedColors bottomBorderColor = ecs.getBottomBorderColor();
+            BorderStyle bottomBorderStyle = ecs.getBottomBorderStyle();
+            IndexedColors leftBorderColor = ecs.getLeftBorderColor();
+            BorderStyle leftBorderStyle = ecs.getLeftBorderStyle();
+            IndexedColors rightBorderColor = ecs.getRightBorderColor();
+            BorderStyle rightBorderStyle = ecs.getRightBorderStyle();
+            IndexedColors topBorderColor = ecs.getTopBorderColor();
+            BorderStyle topBorderStyle = ecs.getTopBorderStyle();
+            setProperty(bottomBorderColor, IndexedColors::getIndex, cs::setBottomBorderColor);
+            setProperty(bottomBorderStyle, cs::setBorderBottom);
+            setProperty(topBorderColor, IndexedColors::getIndex, cs::setTopBorderColor);
+            setProperty(topBorderStyle, cs::setBorderTop);
+            setProperty(rightBorderColor, IndexedColors::getIndex, cs::setRightBorderColor);
+            setProperty(rightBorderStyle, cs::setBorderRight);
+            setProperty(leftBorderColor, IndexedColors::getIndex, cs::setLeftBorderColor);
+            setProperty(leftBorderStyle, cs::setBorderLeft);
         }
-        return cellStyle;
+        return cs;
     }
 
-    private void applyBackgroundColor(CellStyle cs1, Short index) {
-        cs1.setFillForegroundColor(index);
-        cs1.setFillPattern(SOLID_FOREGROUND);
-    }
-
-    private <T, U> void setProperty(T value, Function<T, U> supplier, Consumer<U> consumer){
-        if (value != null) {
-            U apply = supplier.apply(value);
-            consumer.accept(apply);
-        }
-    }
-
-    private <T, U, P> void setProperty(P style, T value, Function<T, U> supplier, BiConsumer<P, U> consumer){
-        if (value != null) {
-            U apply = supplier.apply(value);
-            consumer.accept(style, apply);
-        }
-    }
-
-    private <T> void setProperty(T value, Consumer<T> consumer){
-        if (value != null) {
-            consumer.accept(value);
-        }
-        consumer.accept(value);
-    }
-
-    public void saveStyle(String cellStyleName, ExtendedCellStyle cellStyle) {
-        cellStyle.markImmutable();
-        styleMap.put(cellStyleName, cellStyle);
-    }
 }

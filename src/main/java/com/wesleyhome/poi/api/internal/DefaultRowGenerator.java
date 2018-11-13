@@ -7,23 +7,27 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
+import java.util.NavigableMap;
+import java.util.TreeMap;
+
 public class DefaultRowGenerator implements RowGenerator {
     private final SheetGenerator sheetGenerator;
     private final int rowNum;
-    private CellGenerator currentCell;
-    private ExtendedMap<Integer, DefaultCellGenerator> cells;
+    private Float rowHeight;
+    private DefaultCellGenerator workingCell;
+    private NavigableMap<Integer, DefaultCellGenerator> cells;
     private int startColumn;
 
     public DefaultRowGenerator(SheetGenerator sheetGenerator, int rowNum) {
         this.sheetGenerator = sheetGenerator;
         this.rowNum = rowNum;
-        this.cells = new ExtendedTreeMap<>();
+        this.cells = new TreeMap<>();
         this.startColumn = 0;
     }
 
     @Override
     public RowGenerator withStartColumn(int columnNum) {
-        if(!cells.isEmpty()){
+        if (!cells.isEmpty()) {
             throw new IllegalArgumentException("Must call this before creating cells");
         }
         this.startColumn = columnNum;
@@ -31,8 +35,23 @@ public class DefaultRowGenerator implements RowGenerator {
     }
 
     @Override
+    public int rowNum() {
+        return this.rowNum;
+    }
+
+    @Override
+    public int columnNum() {
+        return this.workingCell.columnNum();
+    }
+
+    @Override
     public Workbook createWorkbook() {
         return sheetGenerator.createWorkbook();
+    }
+
+    @Override
+    public SheetGenerator sheet() {
+        return sheetGenerator;
     }
 
     @Override
@@ -51,25 +70,38 @@ public class DefaultRowGenerator implements RowGenerator {
     }
 
     @Override
+    public RowGenerator row() {
+        return this;
+    }
+
+    @Override
     public CellGenerator nextCell() {
         return cell(getNextColumnNum());
     }
 
+    @Override
+    public CellGenerator cell() {
+        return this.workingCell == null ? nextCell() : this.workingCell;
+    }
+
     private int getNextColumnNum() {
-        if(cells.isEmpty()){
+        if (cells.isEmpty()) {
             return startColumn;
         }
-        return cells.lastKey()+1;
+        DefaultCellGenerator last = cells.lastEntry().getValue();
+        int columnNum = last.columnNum();
+        int cellsToMerge = last.getCellsToMerge();
+        return columnNum + cellsToMerge + 1;
     }
 
     @Override
-    public CellGenerator cell(int columnNumber, int rowNum) {
-        return this.sheetGenerator.cell(columnNumber, rowNum);
+    public CellGenerator cell(int rowNum, int columnNumber) {
+        return this.sheetGenerator.cell(rowNum, columnNumber);
     }
 
     @Override
     public CellGenerator cell(int columnNum) {
-        return currentCell = cells.getOrDefault(columnNum, () -> new DefaultCellGenerator(this, columnNum));
+        return cells.computeIfAbsent(columnNum, colNum-> new DefaultCellGenerator(this, colNum));
     }
 
     @Override
@@ -77,11 +109,17 @@ public class DefaultRowGenerator implements RowGenerator {
         return this.sheetGenerator.cellStyleManager();
     }
 
-    public void applyRow(Sheet sheet) {
+    void applyRow(Sheet sheet) {
         Row row = sheet.createRow(this.rowNum);
-        cells.values()
-            .forEach(cellGen -> {
-                cellGen.applyCell(row);
-            });
+        if (this.rowHeight != null) {
+            row.setHeightInPoints(this.rowHeight);
+        }
+        cells.forEach((colNum, cellGen) -> cellGen.applyCell(row));
+    }
+
+    @Override
+    public RowGenerator height(float rowHeight) {
+        this.rowHeight = rowHeight;
+        return this;
     }
 }

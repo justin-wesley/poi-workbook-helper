@@ -6,7 +6,11 @@ import com.wesleyhome.poi.api.internal.DefaultWorkbookGenerator;
 
 public interface WorkbookGenerator extends WorkbookCreator {
 
-    static SheetGenerator create(){
-        return new DefaultWorkbookGenerator().sheet("Sheet1");
+    static SheetGenerator create() {
+        return create(WorkbookType.EXCEL_OPEN);
+    }
+
+    static SheetGenerator create(WorkbookType workbookType){
+        return new DefaultWorkbookGenerator(workbookType).sheet("Sheet1");
     }
 }

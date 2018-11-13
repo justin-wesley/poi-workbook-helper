@@ -28,7 +28,7 @@ public class DefaultSheetGenerator implements SheetGenerator {
 
     @Override
     public SheetGenerator withStartRow(int rowNum) {
-        if(!rows.isEmpty()){
+        if (!rows.isEmpty()) {
             throw new IllegalArgumentException("Rows have already been generated. This must be called before any rows are created");
         }
         startRowNum = rowNum;
@@ -47,7 +47,15 @@ public class DefaultSheetGenerator implements SheetGenerator {
 
     @Override
     public RowGenerator row(int rowNum) {
-        return workingRow = rows.getOrDefault(rowNum, () -> new DefaultRowGenerator(this, rowNum));
+        return workingRow = rows.computeIfAbsent(rowNum, rn -> new DefaultRowGenerator(this, rn));
+    }
+
+    @Override
+    public RowGenerator row() {
+        if(this.workingRow == null){
+            return nextRow();
+        }
+        return this.workingRow;
     }
 
     @Override
@@ -56,23 +64,28 @@ public class DefaultSheetGenerator implements SheetGenerator {
     }
 
     private int getNextRowNum() {
-        if(rows.isEmpty()){
+        if (rows.isEmpty()) {
             return startRowNum;
         }
-        return rows.lastKey()+1;
+        return rows.lastKey() + 1;
     }
 
     @Override
     public CellGenerator nextCell() {
-        if(workingRow == null){
+        if (workingRow == null) {
             return nextRow().nextCell();
         }
         return workingRow.nextCell();
     }
 
     @Override
-    public CellGenerator cell(int columnNumber, int rowNum) {
+    public CellGenerator cell(int rowNum, int columnNumber) {
         return row(rowNum).cell(columnNumber);
+    }
+
+    @Override
+    public CellGenerator cell() {
+        return this.row().cell();
     }
 
     @Override
@@ -83,8 +96,16 @@ public class DefaultSheetGenerator implements SheetGenerator {
     public void applySheet(Workbook workbook) {
         Sheet sheet = workbook.createSheet(this.sheetName);
         rows.values()
-            .forEach(rowGen -> {
-                rowGen.applyRow(sheet);
-            });
+            .forEach(rowGen -> rowGen.applyRow(sheet));
+    }
+
+    @Override
+    public int rowNum() {
+        return workingRow.rowNum();
+    }
+
+    @Override
+    public int columnNum() {
+        return workingRow.columnNum();
     }
 }

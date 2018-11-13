@@ -13,7 +13,7 @@ public class CellAssert extends AbstractAssert<CellAssert, Cell> {
 
     public CellAssert hasValue(Object expectedValue) {
         isNotNull();
-        CellType cellTypeEnum = actual.getCellTypeEnum();
+        CellType cellTypeEnum = actual.getCellType();
         Object actualValue;
         switch (cellTypeEnum){
             case STRING:

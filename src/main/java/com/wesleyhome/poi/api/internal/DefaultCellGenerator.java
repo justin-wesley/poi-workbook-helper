@@ -4,41 +4,118 @@ import com.wesleyhome.poi.api.CellGenerator;
 import com.wesleyhome.poi.api.RowGenerator;
 import com.wesleyhome.poi.api.SheetGenerator;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellAddress;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellUtil;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.function.Function;
 
-import static org.apache.poi.ss.usermodel.CellType.BLANK;
-import static org.apache.poi.ss.usermodel.CellType.NUMERIC;
-import static org.apache.poi.ss.usermodel.CellType.STRING;
+import static com.wesleyhome.poi.api.creator.WorkbookCreator.formatCellRange;
+import static org.apache.poi.ss.usermodel.CellType.*;
 
-public class DefaultCellGenerator implements CellGenerator {
+public class DefaultCellGenerator implements CellGenerator, Comparable<DefaultCellGenerator> {
     private final RowGenerator rowGenerator;
     private final int columnNum;
+    private int cellsToMerge = 0;
     private ExtendedCellStyle extendedCellStyle;
     private Object cellValue;
-    private CellType cellType;
+    private GeneratorCellType cellType;
+    private Float cellWidth;
 
-    enum CellType {
+    enum GeneratorCellType {
         DATE,
         INTEGER,
         CURRENCY,
         NUMERIC,
-        STRING
+        STRING,
+        FORMULA
     }
 
     public DefaultCellGenerator(RowGenerator rowGenerator, int columnNum) {
         this.rowGenerator = rowGenerator;
         this.columnNum = columnNum;
         this.extendedCellStyle = new ExtendedCellStyle();
-        cellType = CellType.STRING;
+    }
+
+    @Override
+    public int columnNum() {
+        return columnNum;
+    }
+
+    @Override
+    public CellAddress cellAddress() {
+        return new CellAddress(this.rowNum(), this.columnNum());
+    }
+
+    @Override
+    public int rowNum() {
+        return rowGenerator.rowNum();
+    }
+
+    @Override
+    public SheetGenerator sheet() {
+        return rowGenerator.sheet();
+    }
+
+    @Override
+    public CellGenerator withHorizontalAlignment(HorizontalAlignment horizontalAlignment) {
+        return applyCellStyle(ecs->ecs.withHorizontalAlignment(horizontalAlignment));
     }
 
     @Override
     public CellGenerator havingValue(Object cellValue) {
         this.cellValue = cellValue;
+        if (this.cellValue != null && this.cellType == null) {
+            if (cellValue instanceof Integer) {
+                this.cellType = GeneratorCellType.INTEGER;
+            }else if (cellValue instanceof Number) {
+                this.cellType = GeneratorCellType.NUMERIC;
+            } else if (cellValue instanceof Date || cellValue instanceof LocalDate || cellValue instanceof LocalDateTime) {
+                this.cellType = GeneratorCellType.DATE;
+            } else {
+                this.cellType = GeneratorCellType.STRING;
+            }
+        }
         return this;
+    }
+
+    @Override
+    public CellGenerator sumOfPreviousXRows(int numberOfRows) {
+
+        int teamRowNum = this.rowGenerator.rowNum();
+        int columnNum = this.columnNum;
+        int startRow = teamRowNum - numberOfRows;
+        int endRow = teamRowNum - 1;
+        CellRangeAddress cellAddress = cell(startRow, columnNum).rangeAddress(endRow, columnNum);
+        String cellRange = formatCellRange(cellAddress);
+        return withFormula("SUM(%s)", cellRange);
+    }
+
+    @Override
+    public CellRangeAddress rangeAddress(int endRow, int endColumn) {
+        return new CellRangeAddress(rowNum(), endRow, columnNum(), endColumn);
+    }
+
+    @Override
+    public CellGenerator withFormula(String formulaTemplate, Object... args) {
+        this.cellValue = String.format(formulaTemplate, args);
+        this.cellType = GeneratorCellType.FORMULA;
+        return this;
+    }
+
+    @Override
+    public CellGenerator mergeWithNextXCells(int numberOfCellsToMerge) {
+        this.cellsToMerge = numberOfCellsToMerge;
+        return this;
+    }
+
+    int getCellsToMerge() {
+        return cellsToMerge;
     }
 
     @Override
@@ -49,43 +126,97 @@ public class DefaultCellGenerator implements CellGenerator {
 
     @Override
     public CellGenerator withDateFormat() {
-        this.extendedCellStyle.withDataFormat("m/d/yyyy");
-        this.cellType = CellType.DATE;
-        return this;
+        this.cellType = GeneratorCellType.DATE;
+        return applyFormat("m/d/yy h:mm");
     }
 
     @Override
     public CellGenerator withIntegerFormat() {
-        return this;
+        this.cellType = GeneratorCellType.INTEGER;
+        return applyCellStyle(ecs -> ecs.withDataFormat(1));
+    }
+
+    @Override
+    public CellGenerator withAccountingFormat() {
+        return applyFormat("_(\"$\"* #,##0.00_);_(\"$\"* (#,##0.00);_(\"$\"* \"-\"??_);_(@_)");
     }
 
     @Override
     public CellGenerator withCurrencyFormat() {
-        return this;
+        return applyFormat("\"$\"#,##0_);(\"$\"#,##0)");
     }
 
     @Override
     public CellGenerator withNumericStyle() {
-        return this;
+        return applyFormat("#,##0.00");
+    }
+
+    private CellGenerator applyFormat(String fmt) {
+        int index = BuiltinFormats.getBuiltinFormat(fmt);
+        return applyCellStyle(ecs -> ecs.withDataFormat(index));
+    }
+
+    @Override
+    public CellGenerator withAllBorders(BorderStyle borderStyle, IndexedColors color) {
+        return this.withTopBorder(borderStyle, color)
+            .withBottomBorder(borderStyle, color)
+            .withLeftBorder(borderStyle, color)
+            .withRightBorder(borderStyle, color);
+    }
+
+    @Override
+    public CellGenerator withTopBorder(BorderStyle borderStyle, IndexedColors color) {
+        return applyCellStyle(ecs->ecs.withTopBorder(borderStyle, color));
+    }
+
+    @Override
+    public CellGenerator withBottomBorder(BorderStyle borderStyle, IndexedColors color) {
+        return applyCellStyle(ecs->ecs.withBottomBorder(borderStyle, color));
+    }
+
+    @Override
+    public CellGenerator withLeftBorder(BorderStyle borderStyle, IndexedColors color) {
+        return applyCellStyle(ecs->ecs.withLeftBorder(borderStyle, color));
+    }
+
+    @Override
+    public CellGenerator withRightBorder(BorderStyle borderStyle, IndexedColors color) {
+        return applyCellStyle(ecs->ecs.withRightBorder(borderStyle, color));
     }
 
     @Override
     public CellGenerator withBackgroundColor(IndexedColors color) {
-        return this;
+        return applyCellStyle(ecs->ecs.withBackgroundColor(color));
     }
 
     @Override
     public CellGenerator withFontColor(IndexedColors color) {
+        return applyCellStyle(ecs->ecs.withFontColor(color));
+    }
+
+    private CellGenerator applyCellStyle(Function<ExtendedCellStyle, ExtendedCellStyle> consumer) {
+        this.extendedCellStyle = consumer.apply(this.extendedCellStyle);
         return this;
     }
 
     @Override
     public CellGenerator isBold() {
-        return this;
+        return applyCellStyle(ExtendedCellStyle::withBold);
+    }
+
+    @Override
+    public CellGenerator notBold() {
+        return applyCellStyle(ExtendedCellStyle::withoutBold);
     }
 
     @Override
     public CellGenerator withNoBackgroundColor() {
+        return applyCellStyle(ExtendedCellStyle::noBackgroundColor);
+    }
+
+    @Override
+    public CellGenerator cellWidth(float cellWidth) {
+        this.cellWidth = cellWidth;
         return this;
     }
 
@@ -111,6 +242,16 @@ public class DefaultCellGenerator implements CellGenerator {
     }
 
     @Override
+    public RowGenerator row() {
+        return rowGenerator;
+    }
+
+    @Override
+    public CellGenerator cell() {
+        return this;
+    }
+
+    @Override
     public RowGenerator row(int rowNum) {
         return this.rowGenerator.row(rowNum);
     }
@@ -121,8 +262,18 @@ public class DefaultCellGenerator implements CellGenerator {
     }
 
     @Override
-    public CellGenerator cell(int columnNumber, int rowNum) {
-        return this.rowGenerator.cell(columnNumber, rowNum);
+    public CellGenerator withWrappedText() {
+        return applyCellStyle(ExtendedCellStyle::withWrappedText);
+    }
+
+    @Override
+    public CellGenerator withoutWrappedText() {
+        return applyCellStyle(ExtendedCellStyle::withoutWrappedText);
+    }
+
+    @Override
+    public CellGenerator cell(int rowNum, int columnNumber) {
+        return this.rowGenerator.cell(rowNum, columnNumber);
     }
 
     @Override
@@ -131,7 +282,7 @@ public class DefaultCellGenerator implements CellGenerator {
     }
 
     public void applyCell(Row row) {
-        Cell cell = row.createCell(columnNum);
+        Cell cell = CellUtil.getCell(row, columnNum);
         if (cellValue == null) {
             cell.setCellType(BLANK);
         } else {
@@ -145,14 +296,28 @@ public class DefaultCellGenerator implements CellGenerator {
                     cell.setCellType(NUMERIC);
                     cell.setCellValue(getNumericValue());
                     break;
+                case FORMULA:
+                    cell.setCellType(CellType.FORMULA);
+                    cell.setCellFormula(this.cellValue.toString());
+                    break;
                 default:
                     cell.setCellType(STRING);
                     cell.setCellValue(cellValue.toString());
                     break;
             }
         }
-        CellStyle cellStyle = cellStyleManager().getCellStyle(row.getSheet().getWorkbook(), this.extendedCellStyle);
-        cell.setCellStyle(cellStyle);
+        if(cellWidth != null) {
+            int v = (int)(cellWidth * 256);
+            cell.getRow().getSheet().setColumnWidth(columnNum, v);
+        }
+        if(cellsToMerge > 0) {
+            CellRangeAddress cellRangeAddress = new CellRangeAddress(this.rowNum(), this.rowNum(), this.columnNum, this.columnNum + this.cellsToMerge);
+            Sheet sheet = cell.getSheet();
+            sheet.addMergedRegion(cellRangeAddress);
+            cellStyleManager().applyCellStyle(cellRangeAddress, sheet, this.extendedCellStyle);
+        } else {
+            cellStyleManager().applyCellStyle(cell, this.extendedCellStyle);
+        }
     }
 
     private double getNumericValue() {
@@ -180,5 +345,10 @@ public class DefaultCellGenerator implements CellGenerator {
             }
         }
         return null;
+    }
+
+    @Override
+    public int compareTo(DefaultCellGenerator o) {
+        return Integer.compare(this.columnNum, o.columnNum);
     }
 }

@@ -6,17 +6,17 @@ import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
 
-import static com.wesleyhome.poi.api.internal.Immutable.immutable;
 import static lombok.AccessLevel.PACKAGE;
 
 /**
  * This will hold all the cell style information and can be used to manage cell styles for the workbook
  */
-@Getter(PACKAGE)
-@EqualsAndHashCode
-@ToString
-@Builder(toBuilder = true)
+@Getter
+@AllArgsConstructor(access = PACKAGE)
 @NoArgsConstructor(access = PACKAGE)
+@EqualsAndHashCode
+@Builder(toBuilder = true)
+@ToString
 class ExtendedCellStyle {
 
     private HorizontalAlignment horizontalAlignment;
@@ -28,7 +28,7 @@ class ExtendedCellStyle {
     private IndexedColors leftBorderColor;
     private BorderStyle rightBorderStyle;
     private IndexedColors rightBorderColor;
-    private String dataFormatString;
+    private Integer dataFormat;
     private IndexedColors backgroundColor;
     private IndexedColors fontColor;
     private String fontName;
@@ -39,7 +39,7 @@ class ExtendedCellStyle {
     private VerticalAlignment verticalAlignment;
     private boolean immutable;
 
-    ExtendedCellStyle withHorizonalAlignment(HorizontalAlignment horizontalAlignment) {
+    ExtendedCellStyle withHorizontalAlignment(HorizontalAlignment horizontalAlignment) {
         checkImmutable();
         this.horizontalAlignment = horizontalAlignment;
         return this;
@@ -51,9 +51,15 @@ class ExtendedCellStyle {
         }
     }
 
-    private ExtendedCellStyle withWrappedText() {
+    ExtendedCellStyle withWrappedText() {
         checkImmutable();
         this.wrappedText = true;
+        return this;
+    }
+
+    ExtendedCellStyle withoutWrappedText() {
+        checkImmutable();
+        this.wrappedText = false;
         return this;
     }
 
@@ -91,12 +97,6 @@ class ExtendedCellStyle {
         return this;
     }
 
-    ExtendedCellStyle withDataFormat(String dataFormat) {
-        checkImmutable();
-        this.dataFormatString = dataFormat;
-        return this;
-    }
-
     ExtendedCellStyle withBackgroundColor(IndexedColors backgroundColor) {
         checkImmutable();
         this.backgroundColor = backgroundColor;
@@ -117,9 +117,15 @@ class ExtendedCellStyle {
         return this;
     }
 
-    private ExtendedCellStyle withBold() {
+    ExtendedCellStyle withBold() {
         checkImmutable();
         this.bold = true;
+        return this;
+    }
+
+    ExtendedCellStyle withoutBold() {
+        checkImmutable();
+        this.bold = false;
         return this;
     }
 
@@ -135,12 +141,24 @@ class ExtendedCellStyle {
         return this;
     }
 
-    public ExtendedCellStyle copy() {
-        ExtendedCellStyleBuilder builder = this.toBuilder();
-        return builder.build();
+    public ExtendedCellStyle withDataFormat(int index) {
+        this.dataFormat = index;
+        return this;
     }
 
     void markImmutable() {
         this.immutable = true;
     }
+
+    public ExtendedCellStyle copy() {
+        return toBuilder()
+            .immutable(false)
+            .build();
+    }
+
+    public ExtendedCellStyle noBackgroundColor() {
+        this.backgroundColor = null;
+        return this;
+    }
+
 }

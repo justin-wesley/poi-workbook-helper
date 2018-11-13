@@ -3,6 +3,8 @@ package com.wesleyhome.poi.api.creator;
 import com.wesleyhome.poi.api.*;
 import com.wesleyhome.poi.api.internal.CellStyleManager;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellAddress;
+import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.util.regex.Matcher;
 
@@ -21,11 +23,19 @@ public interface WorkbookCreator {
 
     RowGenerator nextRow();
 
+    RowGenerator row();
+
     RowGenerator row(int rowNum);
 
     CellGenerator nextCell();
 
-    CellGenerator cell(int columnNumber, int rowNum);
+    CellGenerator cell();
+
+    CellGenerator cell(int rowNum, int columnNumber);
+
+    int rowNum();
+
+    int columnNum();
 
     default CellGenerator cell(String cellName){
         Matcher matcher = CellNameHelper.CELL_PATTERN.matcher(cellName);
@@ -33,10 +43,16 @@ public interface WorkbookCreator {
             String columnName = matcher.group(1);
             int rowNum = Integer.parseInt(matcher.group(2)) - 1;
             int colNum = convertColStringToIndex(columnName);
-            return cell(colNum, rowNum);
+            return cell(rowNum, colNum);
         }
         throw new IllegalArgumentException(format("%s is not a valid Cell Reference Name", cellName));
     }
 
     CellStyleManager cellStyleManager();
+
+    static String formatCellRange(CellRangeAddress cellRangeAddress) {
+        CellAddress first = new CellAddress(cellRangeAddress.getFirstRow(), cellRangeAddress.getFirstColumn());
+        CellAddress last = new CellAddress(cellRangeAddress.getLastRow(), cellRangeAddress.getLastColumn());
+        return String.format("%s:%s", first.formatAsString(), last.formatAsString());
+    }
 }
