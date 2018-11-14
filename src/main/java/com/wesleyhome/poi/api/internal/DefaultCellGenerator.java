@@ -3,6 +3,7 @@ package com.wesleyhome.poi.api.internal;
 import com.wesleyhome.poi.api.CellGenerator;
 import com.wesleyhome.poi.api.RowGenerator;
 import com.wesleyhome.poi.api.SheetGenerator;
+import com.wesleyhome.poi.api.WorkbookGenerator;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -13,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Objects;
 import java.util.function.Function;
 
 import static com.wesleyhome.poi.api.creator.WorkbookCreator.formatCellRange;
@@ -232,6 +234,11 @@ public class DefaultCellGenerator implements CellGenerator, Comparable<DefaultCe
     }
 
     @Override
+    public WorkbookGenerator workbook() {
+        return this.rowGenerator.workbook();
+    }
+
+    @Override
     public SheetGenerator sheet(String sheetName) {
         return this.rowGenerator.sheet(sheetName);
     }
@@ -350,5 +357,10 @@ public class DefaultCellGenerator implements CellGenerator, Comparable<DefaultCe
     @Override
     public int compareTo(DefaultCellGenerator o) {
         return Integer.compare(this.columnNum, o.columnNum);
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toString(this.cellValue, "");
     }
 }

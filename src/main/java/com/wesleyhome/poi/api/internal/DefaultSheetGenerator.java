@@ -41,6 +41,11 @@ public class DefaultSheetGenerator implements SheetGenerator {
     }
 
     @Override
+    public WorkbookGenerator workbook() {
+        return this.workbookGenerator;
+    }
+
+    @Override
     public SheetGenerator sheet(String sheetName) {
         return workbookGenerator.sheet(sheetName);
     }
@@ -107,5 +112,10 @@ public class DefaultSheetGenerator implements SheetGenerator {
     @Override
     public int columnNum() {
         return workingRow.columnNum();
+    }
+
+    @Override
+    public String toString() {
+        return this.sheetName;
     }
 }

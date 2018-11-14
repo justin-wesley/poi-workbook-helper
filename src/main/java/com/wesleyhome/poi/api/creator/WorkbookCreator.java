@@ -15,6 +15,8 @@ public interface WorkbookCreator {
 
     Workbook createWorkbook();
 
+    WorkbookGenerator workbook();
+
     default SheetGenerator sheet(){
         return sheet("Sheet1");
     }

@@ -3,12 +3,14 @@ package com.wesleyhome.poi.api.internal;
 import com.wesleyhome.poi.api.CellGenerator;
 import com.wesleyhome.poi.api.RowGenerator;
 import com.wesleyhome.poi.api.SheetGenerator;
+import com.wesleyhome.poi.api.WorkbookGenerator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import java.util.NavigableMap;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 public class DefaultRowGenerator implements RowGenerator {
     private final SheetGenerator sheetGenerator;
@@ -47,6 +49,11 @@ public class DefaultRowGenerator implements RowGenerator {
     @Override
     public Workbook createWorkbook() {
         return sheetGenerator.createWorkbook();
+    }
+
+    @Override
+    public WorkbookGenerator workbook() {
+        return this.sheetGenerator.workbook();
     }
 
     @Override
@@ -121,5 +128,10 @@ public class DefaultRowGenerator implements RowGenerator {
     public RowGenerator height(float rowHeight) {
         this.rowHeight = rowHeight;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return this.cells.values().stream().map(Object::toString).collect(Collectors.joining(","));
     }
 }

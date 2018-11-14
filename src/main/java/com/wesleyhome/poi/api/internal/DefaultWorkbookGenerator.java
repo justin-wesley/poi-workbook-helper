@@ -11,6 +11,8 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.util.stream.Collectors;
+
 public class DefaultWorkbookGenerator implements WorkbookGenerator {
 
     private final CellStyleManager cellStyleManager;
@@ -22,6 +24,11 @@ public class DefaultWorkbookGenerator implements WorkbookGenerator {
         this.workbookType = workbookType;
         sheets = new ExtendedTreeMap<>();
         this.cellStyleManager = new CellStyleManager();
+    }
+
+    @Override
+    public WorkbookGenerator workbook() {
+        return this;
     }
 
     @Override
@@ -110,5 +117,10 @@ public class DefaultWorkbookGenerator implements WorkbookGenerator {
     @Override
     public int columnNum() {
         return workingSheet.columnNum();
+    }
+
+    @Override
+    public String toString() {
+        return this.sheets.values().stream().map(Object::toString).collect(Collectors.joining(","));
     }
 }
