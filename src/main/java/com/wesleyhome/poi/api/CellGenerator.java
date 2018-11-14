@@ -17,6 +17,8 @@ import java.util.function.Predicate;
 public interface CellGenerator extends WorkbookCreator{
     CellGenerator havingValue(Object cellValue);
 
+    boolean hasValue();
+
     CellGenerator sumOfPreviousXRows(int numberOfRows);
 
     CellGenerator withFormula(String formula, Object... args);
@@ -64,6 +66,8 @@ public interface CellGenerator extends WorkbookCreator{
     CellGenerator withWrappedText();
 
     CellGenerator withoutWrappedText();
+
+    CellGenerator autosize();
 
     CellAddress cellAddress();
 

@@ -16,7 +16,7 @@ public class DefaultRowGenerator implements RowGenerator {
     private final SheetGenerator sheetGenerator;
     private final int rowNum;
     private Float rowHeight;
-    private DefaultCellGenerator workingCell;
+    private CellGenerator workingCell;
     private NavigableMap<Integer, DefaultCellGenerator> cells;
     private int startColumn;
 
@@ -83,7 +83,7 @@ public class DefaultRowGenerator implements RowGenerator {
 
     @Override
     public CellGenerator nextCell() {
-        return cell(getNextColumnNum());
+        return this.workingCell = cell(getNextColumnNum());
     }
 
     @Override
@@ -95,7 +95,7 @@ public class DefaultRowGenerator implements RowGenerator {
         if (cells.isEmpty()) {
             return startColumn;
         }
-        DefaultCellGenerator last = this.workingCell;
+        DefaultCellGenerator last = (DefaultCellGenerator)this.workingCell;
         int columnNum = last.columnNum();
         int cellsToMerge = last.getCellsToMerge();
         return columnNum + cellsToMerge + 1;

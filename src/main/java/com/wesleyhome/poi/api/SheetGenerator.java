@@ -42,4 +42,6 @@ public interface SheetGenerator extends WorkbookCreator {
     default SheetGenerator generateCell(Function<CellGenerator, CellGenerator> cellGeneratorFunction) {
         return cellGeneratorFunction.apply(this.cell()).sheet();
     }
+
+    SheetGenerator autosize(int columnNum);
 }

@@ -7,17 +7,24 @@ import com.wesleyhome.poi.api.WorkbookGenerator;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
 public class DefaultSheetGenerator implements SheetGenerator {
     private final WorkbookGenerator workbookGenerator;
     private String sheetName;
     private RowGenerator workingRow;
     private int startRowNum = 0;
     private final ExtendedMap<Integer, DefaultRowGenerator> rows;
+    private Set<Integer> autosizeColumns;
 
     public DefaultSheetGenerator(WorkbookGenerator workbookGenerator, String sheetName) {
         this.workbookGenerator = workbookGenerator;
         this.sheetName = sheetName;
         this.rows = new ExtendedTreeMap<>();
+        autosizeColumns = new TreeSet<>();
     }
 
     @Override
@@ -102,6 +109,13 @@ public class DefaultSheetGenerator implements SheetGenerator {
         Sheet sheet = workbook.createSheet(this.sheetName);
         rows.values()
             .forEach(rowGen -> rowGen.applyRow(sheet));
+        autosizeColumns.forEach(colNum->sheet.autoSizeColumn(colNum, true));
+    }
+
+    @Override
+    public SheetGenerator autosize(int columnNum) {
+        this.autosizeColumns.add(columnNum);
+        return this;
     }
 
     @Override

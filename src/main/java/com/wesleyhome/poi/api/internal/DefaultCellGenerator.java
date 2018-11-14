@@ -24,6 +24,7 @@ public class DefaultCellGenerator implements CellGenerator, Comparable<DefaultCe
     private final RowGenerator rowGenerator;
     private final int columnNum;
     private int cellsToMerge = 0;
+    private boolean autosize;
     private ExtendedCellStyle extendedCellStyle;
     private Object cellValue;
     private GeneratorCellType cellType;
@@ -70,9 +71,14 @@ public class DefaultCellGenerator implements CellGenerator, Comparable<DefaultCe
     }
 
     @Override
+    public CellGenerator autosize() {
+        return this.row().sheet().autosize(this.columnNum).cell();
+    }
+
+    @Override
     public CellGenerator havingValue(Object cellValue) {
         this.cellValue = cellValue;
-        if (this.cellValue != null && this.cellType == null) {
+        if (hasValue() && this.cellType == null) {
             if (cellValue instanceof Integer) {
                 this.cellType = GeneratorCellType.INTEGER;
             }else if (cellValue instanceof Number) {
@@ -290,7 +296,7 @@ public class DefaultCellGenerator implements CellGenerator, Comparable<DefaultCe
 
     public void applyCell(Row row) {
         Cell cell = CellUtil.getCell(row, columnNum);
-        if (cellValue == null) {
+        if (!hasValue()) {
             cell.setCellType(BLANK);
         } else {
             switch (cellType) {
@@ -327,6 +333,11 @@ public class DefaultCellGenerator implements CellGenerator, Comparable<DefaultCe
         }
     }
 
+    @Override
+    public boolean hasValue() {
+        return cellValue != null;
+    }
+
     private double getNumericValue() {
         if (cellValue instanceof String) {
             String stringValue = (String) cellValue;
@@ -361,6 +372,6 @@ public class DefaultCellGenerator implements CellGenerator, Comparable<DefaultCe
 
     @Override
     public String toString() {
-        return Objects.toString(this.cellValue, "");
+        return String.format("[%s]->%s", this.cellAddress().formatAsString(), Objects.toString(this.cellValue, ""));
     }
 }
