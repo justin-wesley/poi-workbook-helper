@@ -95,7 +95,7 @@ public class DefaultRowGenerator implements RowGenerator {
         if (cells.isEmpty()) {
             return startColumn;
         }
-        DefaultCellGenerator last = cells.lastEntry().getValue();
+        DefaultCellGenerator last = this.workingCell;
         int columnNum = last.columnNum();
         int cellsToMerge = last.getCellsToMerge();
         return columnNum + cellsToMerge + 1;
