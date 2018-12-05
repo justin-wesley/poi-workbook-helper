@@ -112,6 +112,7 @@ public class DefaultSheetGenerator implements SheetGenerator {
         rows.values()
             .forEach(rowGen -> rowGen.applyRow(sheet));
         autosizeColumns.forEach(colNum->sheet.autoSizeColumn(colNum, true));
+        hiddenColumns.forEach(colNum->sheet.setColumnHidden(colNum, true));
     }
 
     @Override
