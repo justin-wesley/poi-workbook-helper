@@ -44,4 +44,6 @@ public interface SheetGenerator extends WorkbookCreator {
     }
 
     SheetGenerator autosize(int columnNum);
+
+    SheetGenerator hide(int columnNum);
 }

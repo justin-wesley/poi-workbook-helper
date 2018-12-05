@@ -24,7 +24,6 @@ public class DefaultCellGenerator implements CellGenerator, Comparable<DefaultCe
     private final RowGenerator rowGenerator;
     private final int columnNum;
     private int cellsToMerge = 0;
-    private boolean autosize;
     private ExtendedCellStyle extendedCellStyle;
     private Object cellValue;
     private GeneratorCellType cellType;
@@ -73,6 +72,11 @@ public class DefaultCellGenerator implements CellGenerator, Comparable<DefaultCe
     @Override
     public CellGenerator autosize() {
         return this.row().sheet().autosize(this.columnNum).cell();
+    }
+
+    @Override
+    public CellGenerator hide() {
+        return this.row().sheet().hide(this.columnNum).cell();
     }
 
     @Override

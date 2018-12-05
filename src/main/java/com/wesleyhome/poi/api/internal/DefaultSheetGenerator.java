@@ -19,12 +19,14 @@ public class DefaultSheetGenerator implements SheetGenerator {
     private int startRowNum = 0;
     private final ExtendedMap<Integer, DefaultRowGenerator> rows;
     private Set<Integer> autosizeColumns;
+    private Set<Integer> hiddenColumns;
 
     public DefaultSheetGenerator(WorkbookGenerator workbookGenerator, String sheetName) {
         this.workbookGenerator = workbookGenerator;
         this.sheetName = sheetName;
         this.rows = new ExtendedTreeMap<>();
-        autosizeColumns = new TreeSet<>();
+        this.autosizeColumns = new TreeSet<>();
+        this.hiddenColumns = new TreeSet<>();
     }
 
     @Override
@@ -115,6 +117,12 @@ public class DefaultSheetGenerator implements SheetGenerator {
     @Override
     public SheetGenerator autosize(int columnNum) {
         this.autosizeColumns.add(columnNum);
+        return this;
+    }
+
+    @Override
+    public SheetGenerator hide(int columnNum) {
+        this.hiddenColumns.add(columnNum);
         return this;
     }
 

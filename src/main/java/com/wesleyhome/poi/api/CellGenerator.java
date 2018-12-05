@@ -39,6 +39,8 @@ public interface CellGenerator extends WorkbookCreator{
 
     CellGenerator withFontColor(IndexedColors color);
 
+    CellGenerator hide();
+
     CellGenerator isBold();
 
     CellGenerator notBold();
