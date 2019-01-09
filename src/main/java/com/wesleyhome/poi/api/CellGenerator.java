@@ -8,7 +8,6 @@ import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -25,7 +24,13 @@ public interface CellGenerator extends WorkbookCreator{
 
     CellGenerator usingStyle(String cellStyle);
 
+    CellGenerator usingStyles(String firstStyle, String... otherStyles);
+
+    CellGenerator usingStyles(Iterable<String> styles);
+
     CellGenerator withDateFormat();
+
+    CellGenerator withDateTimeFormat();
 
     CellGenerator withIntegerFormat();
 
@@ -35,15 +40,15 @@ public interface CellGenerator extends WorkbookCreator{
 
     CellGenerator withAccountingFormat();
 
-    CellGenerator withBackgroundColor(IndexedColors color);
+    CellStyler withBackgroundColor(IndexedColors color);
 
-    CellGenerator withFontColor(IndexedColors color);
+    CellStyler withFontColor(IndexedColors color);
 
     CellGenerator hide();
 
-    CellGenerator isBold();
+    CellStyler isBold();
 
-    CellGenerator notBold();
+    CellStyler notBold();
 
     CellGenerator as(String cellStyleName);
 
@@ -51,19 +56,19 @@ public interface CellGenerator extends WorkbookCreator{
 
     CellGenerator cellWidth(float width);
 
-    CellGenerator withAllBorders(BorderStyle borderStyle, IndexedColors color);
+    CellStyler withAllBorders(BorderStyle borderStyle, IndexedColors color);
 
-    CellGenerator withTopBorder(BorderStyle borderStyle, IndexedColors color);
+    CellStyler withTopBorder(BorderStyle borderStyle, IndexedColors color);
 
-    CellGenerator withBottomBorder(BorderStyle borderStyle, IndexedColors color);
+    CellStyler withBottomBorder(BorderStyle borderStyle, IndexedColors color);
 
-    CellGenerator withLeftBorder(BorderStyle borderStyle, IndexedColors color);
+    CellStyler withLeftBorder(BorderStyle borderStyle, IndexedColors color);
 
-    CellGenerator withRightBorder(BorderStyle borderStyle, IndexedColors color);
+    CellStyler withRightBorder(BorderStyle borderStyle, IndexedColors color);
 
     CellGenerator mergeWithNextXCells(int numberOfCellsToMerge);
 
-    CellGenerator withHorizontalAlignment(HorizontalAlignment horizontalAlignment);
+    CellStyler withHorizontalAlignment(HorizontalAlignment horizontalAlignment);
 
     CellGenerator withWrappedText();
 
@@ -76,6 +81,13 @@ public interface CellGenerator extends WorkbookCreator{
     default CellGenerator applyIf(Predicate<CellGenerator> filter, Consumer<CellGenerator> consumer) {
         if(filter.test(this)){
             consumer.accept(this);
+        }
+        return this;
+    }
+
+    default CellGenerator applyIf(boolean filter, Function<CellGenerator, CellGenerator> function) {
+        if(filter) {
+            return function.apply(this);
         }
         return this;
     }

@@ -4,6 +4,7 @@ import com.wesleyhome.poi.api.*;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.streaming.SXSSFFormulaEvaluator;
@@ -12,18 +13,67 @@ import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DefaultWorkbookGenerator implements WorkbookGenerator {
 
-    private final CellStyleManager cellStyleManager;
+    public interface BuiltinStyles {
+        String ACCOUNTING = "ACCOUNTING";
+        String CURRENCY = "CURRENCY";
+        String DATE_TIME = "DATE_TIME";
+        String INTEGER = "INTEGER";
+        String NO_BACKGROUND_COLOR = "NO_BACKGROUND_COLOR";
+        String NUMERIC = "NUMERIC";
+        String WRAPPED_TEXT = "WRAPPED_TEXT";
+        String BOLD = "BOLD";
+        String DATE = "DATE";
+
+        static String alignName(HorizontalAlignment ha) {
+            return ha.name()+"_H_ALIGN";
+        }
+    }
+
     private final WorkbookType workbookType;
     private ExtendedMap<String, DefaultSheetGenerator> sheets;
     private DefaultSheetGenerator workingSheet;
+    private CellStyler cellStyler;
 
     public DefaultWorkbookGenerator(WorkbookType workbookType) {
         this.workbookType = workbookType;
         sheets = new ExtendedTreeMap<>();
-        this.cellStyleManager = new CellStyleManager();
+        this.cellStyler = new DefaultCellStyler().withAccountingFormat()
+            .as(BuiltinStyles.ACCOUNTING)
+            .reset()
+            .withCurrencyFormat()
+            .as(BuiltinStyles.CURRENCY)
+            .reset()
+            .withDateTimeFormat()
+            .as(BuiltinStyles.DATE_TIME)
+            .reset()
+            .withDateFormat()
+            .as((BuiltinStyles.DATE))
+            .reset()
+            .withIntegerFormat()
+            .as(BuiltinStyles.INTEGER)
+            .reset()
+            .withNoBackgroundColor()
+            .as(BuiltinStyles.NO_BACKGROUND_COLOR)
+            .reset()
+            .withNumericStyle()
+            .as(BuiltinStyles.NUMERIC)
+            .reset()
+            .withWrappedText()
+            .as(BuiltinStyles.WRAPPED_TEXT)
+            .reset()
+            .isBold()
+            .as(BuiltinStyles.BOLD)
+            .reset()
+            .applyEach(HorizontalAlignment.values(), (cs, ha)->cs.withHorizontalAlignment(ha).as(BuiltinStyles.alignName(ha)));
+    }
+
+    @Override
+    public CellStyler cellStyler() {
+        return this.cellStyler;
     }
 
     @Override
@@ -102,11 +152,6 @@ public class DefaultWorkbookGenerator implements WorkbookGenerator {
     @Override
     public CellGenerator cell(int rowNumber, int columnNumber) {
         return workingSheet.cell(rowNumber, columnNumber);
-    }
-
-    @Override
-    public CellStyleManager cellStyleManager() {
-        return cellStyleManager;
     }
 
     @Override

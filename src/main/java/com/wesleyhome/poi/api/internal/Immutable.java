@@ -3,8 +3,6 @@ package com.wesleyhome.poi.api.internal;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import java.lang.reflect.Proxy;
-
 @EqualsAndHashCode
 @ToString
 class Immutable<T> {

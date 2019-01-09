@@ -1,7 +1,6 @@
 package com.wesleyhome.poi.api.creator;
 
 import com.wesleyhome.poi.api.*;
-import com.wesleyhome.poi.api.internal.CellStyleManager;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -50,7 +49,7 @@ public interface WorkbookCreator {
         throw new IllegalArgumentException(format("%s is not a valid Cell Reference Name", cellName));
     }
 
-    CellStyleManager cellStyleManager();
+    CellStyler cellStyler();
 
     static String formatCellRange(CellRangeAddress cellRangeAddress) {
         CellAddress first = new CellAddress(cellRangeAddress.getFirstRow(), cellRangeAddress.getFirstColumn());

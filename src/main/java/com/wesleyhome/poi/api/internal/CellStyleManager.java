@@ -1,5 +1,6 @@
 package com.wesleyhome.poi.api.internal;
 
+import com.wesleyhome.poi.api.CellStyler;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellUtil;
@@ -10,22 +11,29 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static java.util.Comparator.comparingInt;
 import static org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND;
 
 public class CellStyleManager {
 
-    private ExtendedMap<String, ExtendedCellStyle> styleMap;
+    private ExtendedMap<String, CellStyler> cellStylerMap;
+    //    private ExtendedMap<String, ExtendedCellStyle> styleMap;
     private ExtendedMap<Workbook, Map<ExtendedCellStyle, CellStyle>> cellStyles;
 
     CellStyleManager() {
-        styleMap = new ExtendedTreeMap<>();
+//        styleMap = new ExtendedTreeMap<>();
+        cellStylerMap = new ExtendedTreeMap<>();
         cellStyles = new ExtendedTreeMap<>(comparingInt(Object::hashCode));
     }
 
+    CellStyler get(String cellStyle) {
+        return cellStylerMap.computeIfAbsent(cellStyle, cs -> new DefaultCellStyler());
+    }
+
     ExtendedCellStyle copy(String cellStyle) {
-        return styleMap.getOrDefault(cellStyle, new ExtendedCellStyle()).copy();
+        return get(cellStyle).getCellStyle();
     }
 
     private void applyBackgroundColor(CellStyle cs1, Short index) {
@@ -53,19 +61,26 @@ public class CellStyleManager {
         }
     }
 
-    public void saveStyle(String cellStyleName, ExtendedCellStyle cellStyle) {
-        cellStyle.markImmutable();
-        styleMap.put(cellStyleName, cellStyle);
+    public void saveStyle(String cellStyleName, CellStyler cellStyler) {
+        this.cellStylerMap.put(cellStyleName, cellStyler.immutable());
     }
 
     public void applyCellStyle(CellRangeAddress cellRangeAddress, Sheet sheet, ExtendedCellStyle cs) {
         CellStyle cellStyle = getCellStyle(sheet.getWorkbook(), cs, false);
         Cell cell = CellUtil.getCell(CellUtil.getRow(cellRangeAddress.getFirstRow(), sheet), cellRangeAddress.getFirstColumn());
         cell.setCellStyle(cellStyle);
-        RegionUtil.setBottomBorderColor(cs.getBottomBorderColor().index, cellRangeAddress, sheet);
-        RegionUtil.setTopBorderColor(cs.getTopBorderColor().index, cellRangeAddress, sheet);
-        RegionUtil.setLeftBorderColor(cs.getLeftBorderColor().index, cellRangeAddress, sheet);
-        RegionUtil.setRightBorderColor(cs.getRightBorderColor().index, cellRangeAddress, sheet);
+        if (cs.getBottomBorderColor() != null) {
+            RegionUtil.setBottomBorderColor(cs.getBottomBorderColor().index, cellRangeAddress, sheet);
+        }
+        if (cs.getTopBorderColor() != null) {
+            RegionUtil.setTopBorderColor(cs.getTopBorderColor().index, cellRangeAddress, sheet);
+        }
+        if (cs.getLeftBorderColor() != null) {
+            RegionUtil.setLeftBorderColor(cs.getLeftBorderColor().index, cellRangeAddress, sheet);
+        }
+        if (cs.getRightBorderColor() != null) {
+            RegionUtil.setRightBorderColor(cs.getRightBorderColor().index, cellRangeAddress, sheet);
+        }
         RegionUtil.setBorderLeft(cs.getLeftBorderStyle(), cellRangeAddress, sheet);
         RegionUtil.setBorderRight(cs.getRightBorderStyle(), cellRangeAddress, sheet);
         RegionUtil.setBorderBottom(cs.getBottomBorderStyle(), cellRangeAddress, sheet);
@@ -76,7 +91,6 @@ public class CellStyleManager {
         CellStyle cellStyle = getCellStyle(cell.getRow().getSheet().getWorkbook(), extendedCellStyle, true);
         cell.setCellStyle(cellStyle);
     }
-
 
     private CellStyle getCellStyle(Workbook workbook, ExtendedCellStyle ecs, boolean applyBorder) {
         Map<ExtendedCellStyle, CellStyle> extendCSMap = cellStyles.computeIfAbsent(workbook, wb -> new HashMap<>());

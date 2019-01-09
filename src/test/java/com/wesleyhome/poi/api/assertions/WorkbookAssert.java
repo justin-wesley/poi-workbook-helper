@@ -46,7 +46,6 @@ public class WorkbookAssert extends AbstractAssert<WorkbookAssert, Workbook> {
                     Files.deleteIfExists(requireNonNull(workbookPath));
                 }
             } catch (IOException e) {
-                // Don't fail the test because of this
                 e.printStackTrace();
             }
         }

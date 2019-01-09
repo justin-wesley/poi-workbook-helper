@@ -1,16 +1,12 @@
 package com.wesleyhome.poi.api.internal;
 
-import com.wesleyhome.poi.api.CellGenerator;
-import com.wesleyhome.poi.api.RowGenerator;
-import com.wesleyhome.poi.api.SheetGenerator;
-import com.wesleyhome.poi.api.WorkbookGenerator;
+import com.wesleyhome.poi.api.*;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 
 public class DefaultSheetGenerator implements SheetGenerator {
     private final WorkbookGenerator workbookGenerator;
@@ -27,6 +23,12 @@ public class DefaultSheetGenerator implements SheetGenerator {
         this.rows = new ExtendedTreeMap<>();
         this.autosizeColumns = new TreeSet<>();
         this.hiddenColumns = new TreeSet<>();
+    }
+
+    @Override
+    public SheetGenerator generateStyles(Consumer<CellStyler> cellStyler) {
+        cellStyler.accept(this.workbookGenerator.cellStyler());
+        return this;
     }
 
     @Override
@@ -103,8 +105,8 @@ public class DefaultSheetGenerator implements SheetGenerator {
     }
 
     @Override
-    public CellStyleManager cellStyleManager() {
-        return this.workbookGenerator.cellStyleManager();
+    public CellStyler cellStyler() {
+        return this.workbookGenerator.cellStyler();
     }
 
     public void applySheet(Workbook workbook) {

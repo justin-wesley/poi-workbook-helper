@@ -5,6 +5,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.jupiter.api.Test;
 
 import static com.wesleyhome.poi.api.assertions.WorkbookAssert.assertThat;
+import static org.apache.poi.ss.usermodel.IndexedColors.*;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -89,14 +91,20 @@ class WorkbookGeneratorTest {
     }
 
     private Workbook getBasicWorkbook() {
-        return WorkbookGenerator
+        SheetGenerator sheetGenerator = WorkbookGenerator
             .create()
+            .generateStyles(styler -> styler.withBackgroundColor(DARK_BLUE)
+                .withFontColor(WHITE)
+                .as("base")
+                .withBackgroundColor(RED)
+                .as("red"));
+        return sheetGenerator
             .nextCell()
             .havingValue("I am awesome")
-            .withBackgroundColor(IndexedColors.DARK_BLUE)
-            .withFontColor(IndexedColors.WHITE)
+            .usingStyle("base")
             .nextCell()
             .havingValue("You are awesome")
+            .usingStyle("red_base")
             .nextRow()
             .nextCell()
             .havingValue("So are you!!!")
@@ -120,7 +128,7 @@ class WorkbookGeneratorTest {
 //                    .withNextCell().havingValue("Hours in Service").usingStyle("HEADER")
 //                .createNextRow()
 //                    .withNextCell().havingValue("Justin").withNoBackgroundColor().withFontColor(IndexedColors.VIOLET).isBold().as("ODD_ROW")
-//                    .withNextCell().havingValue(LocalDate.of(1976, Month.JUNE, 20)).usingStyle("ODD_ROW").withDateFormat()
+//                    .withNextCell().havingValue(LocalDate.of(1976, Month.JUNE, 20)).usingStyle("ODD_ROW").withDateTimeFormat()
 //                    .withNextCell().havingValue(42).usingStyle("ODD_ROW").withIntegerFormat()
 //                    .withNextCell().havingValue(142000D).usingStyle("ODD_ROW").withCurrencyFormat()
 //                    .withNextCell().havingValue(352123.54).usingStyle("ODD_ROW").withNumericStyle()

@@ -2,7 +2,6 @@ package com.wesleyhome.poi.api;
 
 import com.wesleyhome.poi.api.creator.WorkbookCreator;
 
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 

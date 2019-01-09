@@ -1,9 +1,6 @@
 package com.wesleyhome.poi.api.internal;
 
-import com.wesleyhome.poi.api.CellGenerator;
-import com.wesleyhome.poi.api.RowGenerator;
-import com.wesleyhome.poi.api.SheetGenerator;
-import com.wesleyhome.poi.api.WorkbookGenerator;
+import com.wesleyhome.poi.api.*;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -112,8 +109,8 @@ public class DefaultRowGenerator implements RowGenerator {
     }
 
     @Override
-    public CellStyleManager cellStyleManager() {
-        return this.sheetGenerator.cellStyleManager();
+    public CellStyler cellStyler() {
+        return this.sheetGenerator.cellStyler();
     }
 
     void applyRow(Sheet sheet) {

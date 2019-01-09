@@ -29,7 +29,7 @@
         <assertj.version>3.9.1</assertj.version>
         <java.version>1.8</java.version>
         <junit-jupiter-params-generated.version>1.0.1</junit-jupiter-params-generated.version>
-        <poi.version>4.0.0</poi.version>
+        <poi.version>4.0.1</poi.version>
         <commons-math3.version>3.6.1</commons-math3.version>
     </properties>
     <dependencies>
@@ -44,9 +44,29 @@
             <version>${poi.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>ooxml-schemas</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
             <version>${commons-math3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.8.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>26.0-jre</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

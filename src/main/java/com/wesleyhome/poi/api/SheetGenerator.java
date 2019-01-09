@@ -3,12 +3,13 @@ package com.wesleyhome.poi.api;
 import com.wesleyhome.poi.api.creator.WorkbookCreator;
 
 import java.util.Iterator;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public interface SheetGenerator extends WorkbookCreator {
+
+    SheetGenerator generateStyles(Consumer<CellStyler> cellStyler);
 
     SheetGenerator withSheetName(String test_sheet);
 

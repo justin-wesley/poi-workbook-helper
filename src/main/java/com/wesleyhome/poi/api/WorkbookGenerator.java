@@ -11,6 +11,14 @@ public interface WorkbookGenerator extends WorkbookCreator {
     }
 
     static SheetGenerator create(WorkbookType workbookType){
-        return new DefaultWorkbookGenerator(workbookType).sheet("Sheet1");
+        return create(workbookType, "Sheet1");
+    }
+
+    static SheetGenerator create(String sheetName) {
+        return create(WorkbookType.EXCEL_OPEN, sheetName);
+    }
+
+    static SheetGenerator create(WorkbookType workbookType, String sheetName) {
+        return new DefaultWorkbookGenerator(workbookType).sheet(sheetName);
     }
 }

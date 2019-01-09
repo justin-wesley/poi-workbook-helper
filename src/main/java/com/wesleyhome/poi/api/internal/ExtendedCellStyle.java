@@ -6,6 +6,10 @@ import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
 
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 import static lombok.AccessLevel.PACKAGE;
 
 /**
@@ -17,7 +21,7 @@ import static lombok.AccessLevel.PACKAGE;
 @EqualsAndHashCode
 @Builder(toBuilder = true)
 @ToString
-class ExtendedCellStyle {
+public class ExtendedCellStyle {
 
     private HorizontalAlignment horizontalAlignment;
     private BorderStyle topBorderStyle;
@@ -40,110 +44,93 @@ class ExtendedCellStyle {
     private boolean immutable;
 
     ExtendedCellStyle withHorizontalAlignment(HorizontalAlignment horizontalAlignment) {
-        checkImmutable();
-        this.horizontalAlignment = horizontalAlignment;
-        return this;
+        return checkImmutable(t -> this.horizontalAlignment = horizontalAlignment);
     }
 
-    private void checkImmutable() {
+    private ExtendedCellStyle checkImmutable(Consumer<ExtendedCellStyle> consumer) {
         if (immutable) {
             throw new IllegalArgumentException("Cannot update an immutable style");
         }
+        consumer.accept(this);
+        return this;
     }
 
     ExtendedCellStyle withWrappedText() {
-        checkImmutable();
-        this.wrappedText = true;
-        return this;
+        return checkImmutable(t -> t.wrappedText = true);
     }
 
     ExtendedCellStyle withoutWrappedText() {
-        checkImmutable();
-        this.wrappedText = false;
-        return this;
+        return checkImmutable(t -> t.wrappedText = false);
     }
 
     private ExtendedCellStyle withVerticalAlignment(VerticalAlignment verticalAlignment) {
-        checkImmutable();
-        this.verticalAlignment = verticalAlignment;
-        return this;
+        return checkImmutable(t -> t.verticalAlignment = verticalAlignment);
     }
 
     ExtendedCellStyle withTopBorder(BorderStyle topBorderStyle, IndexedColors topBorderColor) {
-        checkImmutable();
-        this.topBorderStyle = topBorderStyle;
-        this.topBorderColor = topBorderColor;
-        return this;
+        return checkImmutable(t -> {
+            t.topBorderStyle = topBorderStyle;
+            t.topBorderColor = topBorderColor;
+        });
     }
 
     ExtendedCellStyle withBottomBorder(BorderStyle bottomBorderStyle, IndexedColors bottomBorderColor) {
-        checkImmutable();
-        this.bottomBorderStyle = bottomBorderStyle;
-        this.bottomBorderColor = bottomBorderColor;
-        return this;
+        return checkImmutable(t -> {
+            t.bottomBorderStyle = bottomBorderStyle;
+            t.bottomBorderColor = bottomBorderColor;
+        });
     }
 
     ExtendedCellStyle withLeftBorder(BorderStyle leftBorderStyle, IndexedColors leftBorderColor) {
-        checkImmutable();
-        this.leftBorderStyle = leftBorderStyle;
-        this.leftBorderColor = leftBorderColor;
-        return this;
+        return checkImmutable(t -> {
+            t.leftBorderStyle = leftBorderStyle;
+            t.leftBorderColor = leftBorderColor;
+        });
     }
 
     ExtendedCellStyle withRightBorder(BorderStyle rightBorderStyle, IndexedColors rightBorderColor) {
-        checkImmutable();
-        this.rightBorderStyle = rightBorderStyle;
-        this.rightBorderColor = rightBorderColor;
-        return this;
+        return checkImmutable(t -> {
+            t.rightBorderStyle = rightBorderStyle;
+            t.rightBorderColor = rightBorderColor;
+        });
     }
 
     ExtendedCellStyle withBackgroundColor(IndexedColors backgroundColor) {
-        checkImmutable();
-        this.backgroundColor = backgroundColor;
-        return this;
+        return checkImmutable(t -> t.backgroundColor = backgroundColor);
+    }
+
+    public ExtendedCellStyle noBackgroundColor() {
+        return checkImmutable(t -> t.backgroundColor = null);
     }
 
     // Font Properties
 
     ExtendedCellStyle withFontColor(IndexedColors fontColor) {
-        checkImmutable();
-        this.fontColor = fontColor;
-        return this;
+        return checkImmutable(t -> t.fontColor = fontColor);
     }
 
     private ExtendedCellStyle withItalic() {
-        checkImmutable();
-        this.italic = true;
-        return this;
+        return checkImmutable(t -> t.italic = true);
     }
 
     ExtendedCellStyle withBold() {
-        checkImmutable();
-        this.bold = true;
-        return this;
+        return checkImmutable(t -> t.bold = true);
     }
 
     ExtendedCellStyle withoutBold() {
-        checkImmutable();
-        this.bold = false;
-        return this;
+        return checkImmutable(t -> t.bold = false);
     }
 
     private ExtendedCellStyle withFontHeight(int fontHeightInPoints) {
-        checkImmutable();
-        this.fontHeightInPoints = fontHeightInPoints;
-        return this;
+        return checkImmutable(t -> t.fontHeightInPoints = fontHeightInPoints);
     }
 
     private ExtendedCellStyle withFontName(String fontName) {
-        checkImmutable();
-        this.fontName = fontName;
-        return this;
+        return checkImmutable(t -> t.fontName = fontName);
     }
 
     public ExtendedCellStyle withDataFormat(int index) {
-        this.dataFormat = index;
-        return this;
+        return checkImmutable(t -> t.dataFormat = index);
     }
 
     void markImmutable() {
@@ -156,9 +143,33 @@ class ExtendedCellStyle {
             .build();
     }
 
-    public ExtendedCellStyle noBackgroundColor() {
-        this.backgroundColor = null;
-        return this;
+    public ExtendedCellStyle merge(ExtendedCellStyle c) {
+        ExtendedCellStyleBuilder b = this.toBuilder();
+        applyIf(b::backgroundColor, c::getBackgroundColor)
+            .applyIf(b::bold, c::isBold)
+            .applyIf(b::bottomBorderColor, c::getBottomBorderColor)
+            .applyIf(b::bottomBorderStyle, c::getBottomBorderStyle)
+            .applyIf(b::dataFormat, c::getDataFormat)
+            .applyIf(b::fontColor, c::getFontColor)
+            .applyIf(b::fontHeightInPoints, c::getFontHeightInPoints)
+            .applyIf(b::fontName, c::getFontName)
+            .applyIf(b::horizontalAlignment, c::getHorizontalAlignment)
+            .applyIf(b::italic, c::isItalic)
+            .applyIf(b::leftBorderColor, c::getLeftBorderColor)
+            .applyIf(b::leftBorderStyle, c::getLeftBorderStyle)
+            .applyIf(b::rightBorderColor, c::getRightBorderColor)
+            .applyIf(b::rightBorderStyle, c::getRightBorderStyle)
+            .applyIf(b::topBorderColor, c::getTopBorderColor)
+            .applyIf(b::topBorderStyle, c::getTopBorderStyle)
+            .applyIf(b::verticalAlignment, c::getVerticalAlignment)
+            .applyIf(b::wrappedText, c::isWrappedText);
+        return b.build();
     }
 
+    private <T> ExtendedCellStyle applyIf(Function<T, ExtendedCellStyleBuilder> consumer, Supplier<T> supplier) {
+        if (supplier.get() != null) {
+            consumer.apply(supplier.get());
+        }
+        return this;
+    }
 }
