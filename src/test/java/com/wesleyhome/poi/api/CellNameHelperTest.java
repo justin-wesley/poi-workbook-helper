@@ -1,6 +1,5 @@
 package com.wesleyhome.poi.api;
 
-import com.wesleyhome.test.jupiter.MockitoExtension;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -8,6 +7,7 @@ import org.apache.poi.ss.util.CellReference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
