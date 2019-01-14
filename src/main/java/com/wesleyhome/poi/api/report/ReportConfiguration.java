@@ -13,15 +13,19 @@ public interface ReportConfiguration<T> {
 
     String getReportSheetName();
 
-    String getReportDescription();
+    String getReportTitle();
+
+    String getReportTitleStyleName();
+
+    String getReportDescriptionDetail();
+
+    String getReportDescriptionDetailStyleName();
 
     CellGenerator applyStyleAndValueToCell(CellGenerator cellGenerator, ColumnConfiguration<T> columnConfiguration, Object transformedValue);
 
     void createStyles(CellStyler cellStyler);
 
-    String getHeaderStyleName();
-
-    String getDescriptionStyleName();
+    String getColumnHeaderStyleName();
 
     default ColumnConfiguration<T> getColumnConfiguration(String columnIdentifier) {
         return columns().get(columnIdentifier);
@@ -32,4 +36,6 @@ public interface ReportConfiguration<T> {
             .stream()
             .collect(Collectors.toMap(ColumnConfiguration::getColumnName, ColumnConfiguration::getColumnHeader));
     }
+
+    boolean hasReportDescriptionDetails();
 }

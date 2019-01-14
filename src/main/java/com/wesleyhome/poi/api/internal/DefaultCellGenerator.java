@@ -249,7 +249,7 @@ public class DefaultCellGenerator implements CellGenerator, Comparable<DefaultCe
 
     @Override
     public CellStyler isBold() {
-        return this.cellStyler.isBold();
+        return this.cellStyler.withBoldFont();
     }
 
     @Override

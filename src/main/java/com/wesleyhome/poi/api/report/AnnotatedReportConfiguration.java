@@ -32,15 +32,25 @@ public class AnnotatedReportConfiguration<T> extends AbstractReportConfiguration
     }
 
     @Override
+    protected String initializeReportTitle() {
+        String title = reportAnnotation.title();
+        return isNull(title) ? getReportSheetName() : title;
+    }
+
+    @Override
     protected String initializeSheetName() {
         String _sheetName = reportAnnotation.sheetName();
-        return Report.NULL.equals(_sheetName) ? this.reportClass.getSimpleName() : _sheetName;
+        return isNull(_sheetName) ? this.reportClass.getSimpleName() : _sheetName;
     }
 
     @Override
     protected String initializeReportDescription() {
         String _description = reportAnnotation.description();
-        return Report.NULL.equals(_description) ? getReportSheetName() : _description;
+        return isNull(_description) ? getReportSheetName() : _description;
+    }
+
+    private boolean isNull(String _description) {
+        return Report.NULL.equals(_description);
     }
 
     @Override

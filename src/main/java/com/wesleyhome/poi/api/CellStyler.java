@@ -33,9 +33,11 @@ public interface CellStyler {
 
     CellStyler withFontSize(int fontSize);
 
-    CellStyler isBold();
+    CellStyler withBoldFont();
 
     CellStyler notBold();
+
+    CellStyler withItalicFont();
 
     CellStyler withNoBackgroundColor();
 

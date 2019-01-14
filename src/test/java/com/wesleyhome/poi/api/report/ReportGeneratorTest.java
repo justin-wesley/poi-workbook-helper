@@ -27,13 +27,14 @@ class ReportGeneratorTest {
     @Test
     void testDefaultDataPropertyAccessor() throws Exception{
         List<TestDefaultDataPropertyAccessor> records = dpa(20);
-        Path path = Paths.get("target", "test.xlsx");
-        Files.createDirectories(path.getParent());
+        Path testReportDirectory = Paths.get("target", "test", "reports");
+        Files.createDirectories(testReportDirectory);
+        Path reportPath = Files.createTempFile(testReportDirectory, "DefaultReport", ".xlsx");
         ReportConfiguration<TestDefaultDataPropertyAccessor> reportConfiguration = new AnnotatedReportConfiguration<>(TestDefaultDataPropertyAccessor.class);
-        try(OutputStream os = Files.newOutputStream(path); Workbook workbook = defaultDataReportGenerator.generateWorkbook(records, reportConfiguration)){
+        try(OutputStream os = Files.newOutputStream(reportPath); Workbook workbook = defaultDataReportGenerator.generateWorkbook(records, reportConfiguration)){
             workbook.write(os);
         }
-        Desktop.getDesktop().open(path.toFile());
+        Desktop.getDesktop().open(reportPath.toFile());
     }
 
     private List<TestDefaultDataPropertyAccessor> dpa(int numberOfRecords) {

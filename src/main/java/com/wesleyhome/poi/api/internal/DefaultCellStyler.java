@@ -96,8 +96,13 @@ public class DefaultCellStyler implements CellStyler {
     }
 
     @Override
-    public CellStyler isBold() {
-        return applyCellStyle(ExtendedCellStyle::withBold);
+    public CellStyler withBoldFont() {
+        return applyCellStyle(ExtendedCellStyle::withBoldFont);
+    }
+
+    @Override
+    public CellStyler withItalicFont() {
+        return applyCellStyle(ExtendedCellStyle::withItalicFont);
     }
 
     @Override

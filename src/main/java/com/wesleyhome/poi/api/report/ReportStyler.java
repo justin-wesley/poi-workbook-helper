@@ -13,4 +13,6 @@ public interface ReportStyler {
     String getHeaderStyleName();
 
     String getDescriptionStyleName();
+
+    String getReportTitleStyleName();
 }

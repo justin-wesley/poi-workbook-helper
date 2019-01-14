@@ -113,23 +113,19 @@ public class ExtendedCellStyle {
         return checkImmutable(t->t.fontHeightInPoints = fontHeightInPoints);
     }
 
-    private ExtendedCellStyle withItalic() {
-        return checkImmutable(t -> t.italic = true);
+    ExtendedCellStyle withBoldFont() {
+        return checkImmutable(t -> t.bold = true);
     }
 
-    ExtendedCellStyle withBold() {
-        return checkImmutable(t -> t.bold = true);
+    public ExtendedCellStyle withItalicFont() {
+        return checkImmutable(t -> t.italic = true);
     }
 
     ExtendedCellStyle withoutBold() {
         return checkImmutable(t -> t.bold = false);
     }
 
-    private ExtendedCellStyle withFontHeight(int fontHeightInPoints) {
-        return checkImmutable(t -> t.fontHeightInPoints = fontHeightInPoints);
-    }
-
-    private ExtendedCellStyle withFontName(String fontName) {
+    ExtendedCellStyle withFontName(String fontName) {
         return checkImmutable(t -> t.fontName = fontName);
     }
 

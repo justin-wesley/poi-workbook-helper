@@ -10,7 +10,8 @@ import java.util.function.Function;
 
 public class DefaultReportStyler implements ReportStyler {
 
-    private static String REPORT_DESCRIPTION = "REPORT_DESCRIPTION";
+    private static String REPORT_TITLE = "REPORT_TITLE";
+    private static String REPORT_DESCRIPTION_DETAILS = "REPORT_DESCRIPTION_DETAILS";
     private static String COLUMN_HEADER = "COLUMN_HEADER";
     private static String EVEN_ROW = "EVEN_ROW";
     private static String ODD_ROW = "ODD_ROW";
@@ -27,28 +28,38 @@ public class DefaultReportStyler implements ReportStyler {
 
     @Override
     public String getDescriptionStyleName() {
-        return REPORT_DESCRIPTION;
+        return REPORT_DESCRIPTION_DETAILS;
+    }
+
+    @Override
+    public String getReportTitleStyleName() {
+        return REPORT_TITLE;
     }
 
     @Override
     public void createStyles(CellStyler cellStyler) {
-        cellStyler.applyIf(true, createReportDescriptionStyle()).reset()
+        cellStyler.applyIf(true, createReportTitleStyle()).reset()
+            .applyIf(true, createReportDetailsStyle()).reset()
             .applyIf(true, createColumnHeaderStyle()).reset()
             .applyIf(true, createEvenRowStyle()).reset()
             .applyIf(true, createOddRowStyle());
     }
 
+    private Function<CellStyler, CellStyler> createReportDetailsStyle() {
+        return cs -> cs.withItalicFont().withFontSize(10).as(REPORT_DESCRIPTION_DETAILS);
+    }
+
     protected Function<CellStyler, CellStyler> createOddRowStyle() {
         return cs -> cs.withBackgroundColor(oddRowBackgroundColor())
             .withFontColor(oddRowFontColor())
-            .applyIf(isOddRowBold(), CellStyler::isBold)
+            .applyIf(isOddRowBold(), CellStyler::withBoldFont)
             .as(ODD_ROW);
     }
 
     protected Function<CellStyler, CellStyler> createEvenRowStyle() {
         return cs -> cs.withBackgroundColor(evenRowBackgroundColor())
             .withFontColor(evenRowFontColor())
-            .applyIf(isEvenRowBold(), CellStyler::isBold)
+            .applyIf(isEvenRowBold(), CellStyler::withBoldFont)
             .as(EVEN_ROW);
     }
 
@@ -56,14 +67,14 @@ public class DefaultReportStyler implements ReportStyler {
         return cs -> cs.withBackgroundColor(headerBackgroundColor())
             .withFontColor(headerFontColor())
             .withHorizontalAlignment(HorizontalAlignment.CENTER)
-            .applyIf(isHeaderBold(), CellStyler::isBold)
+            .applyIf(isHeaderBold(), CellStyler::withBoldFont)
             .as(COLUMN_HEADER);
     }
 
-    protected Function<CellStyler, CellStyler> createReportDescriptionStyle() {
-        return cs -> cs.isBold()
+    protected Function<CellStyler, CellStyler> createReportTitleStyle() {
+        return cs -> cs.withBoldFont()
             .withFontSize(28)
-            .as(REPORT_DESCRIPTION);
+            .as(REPORT_TITLE);
     }
 
     public IndexedColors headerBackgroundColor() {

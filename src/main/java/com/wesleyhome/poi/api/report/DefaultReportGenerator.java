@@ -14,11 +14,18 @@ public class DefaultReportGenerator<T> implements ReportGenerator<T> {
         return WorkbookGenerator.create(reportConfiguration.getReportSheetName())
             .generateStyles(reportConfiguration::createStyles)
             .nextCell()
-            .usingStyle(reportConfiguration.getDescriptionStyleName())
+            .usingStyle(reportConfiguration.getReportTitleStyleName())
             .mergeWithNextXCells(reportConfiguration.columns().size()-1)
-            .havingValue(reportConfiguration.getReportDescription())
-            .nextRow().nextRow()
-            .generateCells(columnHeaderMap.values(), ((cellGenerator, headerName) -> cellGenerator.autosize().usingStyle(reportConfiguration.getHeaderStyleName()).havingValue(headerName))).nextRow()
+            .havingValue(reportConfiguration.getReportTitle())
+            .nextRow().nextCell()
+            .applyIf(reportConfiguration.hasReportDescriptionDetails(), cg->
+                cg.usingStyle(reportConfiguration.getReportDescriptionDetailStyleName())
+                    .mergeWithNextXCells(reportConfiguration.columns().size()-1)
+                    .havingValue(reportConfiguration.getReportDescriptionDetail())
+                .nextRow().cell()
+            )
+            .nextRow()
+            .generateCells(columnHeaderMap.values(), ((cellGenerator, headerName) -> cellGenerator.autosize().usingStyle(reportConfiguration.getColumnHeaderStyleName()).havingValue(headerName))).nextRow()
             .generateRows(data, ((rowGenerator, value) -> rowGenerator
                 .generateCells(columnHeaderMap.keySet(), ((cellGenerator, columnIdentifier) -> this.generateValueRow(cellGenerator, columnIdentifier, reportConfiguration, value)))
                 .row())).createWorkbook();

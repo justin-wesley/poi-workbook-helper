@@ -13,7 +13,6 @@ import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class DefaultWorkbookGenerator implements WorkbookGenerator {
 
@@ -65,7 +64,7 @@ public class DefaultWorkbookGenerator implements WorkbookGenerator {
             .withWrappedText()
             .as(BuiltinStyles.WRAPPED_TEXT)
             .reset()
-            .isBold()
+            .withBoldFont()
             .as(BuiltinStyles.BOLD)
             .reset()
             .applyEach(HorizontalAlignment.values(), (cs, ha)->cs.withHorizontalAlignment(ha).as(BuiltinStyles.alignName(ha)));

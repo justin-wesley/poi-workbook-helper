@@ -5,10 +5,7 @@ import com.wesleyhome.poi.api.CellStyler;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.SortedMap;
+import java.util.*;
 
 import static com.wesleyhome.poi.api.internal.DefaultWorkbookGenerator.BuiltinStyles.*;
 
@@ -17,6 +14,7 @@ public abstract class AbstractReportConfiguration<T> implements ReportConfigurat
     private final SafeLazyInitializer<String> reportDescriptionInitializer;
     private final SafeLazyInitializer<ReportStyler> reportStylerInitializer;
     private final SafeLazyInitializer<SortedMap<String, ColumnConfiguration<T>>> columnInitializer;
+    private final SafeLazyInitializer<String> reportTitleInitializer;
 
     public AbstractReportConfiguration() {
         this.columnInitializer = new SafeLazyInitializer<SortedMap<String, ColumnConfiguration<T>>>() {
@@ -37,6 +35,12 @@ public abstract class AbstractReportConfiguration<T> implements ReportConfigurat
                 return initializeSheetName();
             }
         };
+        this.reportTitleInitializer = new SafeLazyInitializer<String>() {
+            @Override
+            protected String safeInitialize() {
+                return initializeReportTitle();
+            }
+        };
         this.reportDescriptionInitializer = new SafeLazyInitializer<String>() {
             @Override
             protected String safeInitialize() {
@@ -44,6 +48,8 @@ public abstract class AbstractReportConfiguration<T> implements ReportConfigurat
             }
         };
     }
+
+    protected abstract String initializeReportTitle();
 
     protected abstract String initializeReportDescription();
 
@@ -68,17 +74,32 @@ public abstract class AbstractReportConfiguration<T> implements ReportConfigurat
     }
 
     @Override
-    public final String getReportDescription() {
-        return this.reportDescriptionInitializer.get();
+    public String getReportTitle() {
+        return this.reportTitleInitializer.get();
     }
 
     @Override
-    public String getHeaderStyleName() {
+    public String getReportTitleStyleName() {
+        return getReportStyler().getReportTitleStyleName();
+    }
+
+    @Override
+    public final String getReportDescriptionDetail() {
+        return hasReportDescriptionDetails() ? this.reportDescriptionInitializer.get() : null;
+    }
+
+    @Override
+    public boolean hasReportDescriptionDetails() {
+        return !Objects.equals(this.reportDescriptionInitializer.get(), this.reportTitleInitializer.get());
+    }
+
+    @Override
+    public String getColumnHeaderStyleName() {
         return getReportStyler().getHeaderStyleName();
     }
 
     @Override
-    public String getDescriptionStyleName() {
+    public String getReportDescriptionDetailStyleName() {
         return getReportStyler().getDescriptionStyleName();
     }
 
