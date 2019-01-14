@@ -6,6 +6,7 @@ import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellUtil;
 
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
@@ -31,6 +32,7 @@ public class DefaultCellGenerator implements CellGenerator, Comparable<DefaultCe
 
     enum GeneratorCellType {
         DATE,
+        TIMESTAMP,
         BOOLEAN,
         INTEGER,
         //        CURRENCY,
@@ -83,7 +85,10 @@ public class DefaultCellGenerator implements CellGenerator, Comparable<DefaultCe
         if (hasValue() && this.cellType != null) {
             switch (cellType) {
                 case DATE:
-                    checkCellType(cellValue.getClass(), (cellValue instanceof Date || cellValue instanceof LocalDate || cellValue instanceof LocalDateTime));
+                    checkCellType(cellValue.getClass(), (cellValue instanceof Date || cellValue instanceof LocalDate));
+                    break;
+                case TIMESTAMP:
+                    checkCellType(cellValue.getClass(), (cellValue instanceof Date || cellValue instanceof LocalDateTime));
                     break;
                 case INTEGER:
                     checkCellType(cellValue.getClass(), cellValue instanceof Integer);
@@ -103,7 +108,9 @@ public class DefaultCellGenerator implements CellGenerator, Comparable<DefaultCe
                 this.cellType = INTEGER;
             } else if (cellValue instanceof Number) {
                 this.cellType = NUMERIC;
-            } else if (cellValue instanceof Date || cellValue instanceof LocalDate || cellValue instanceof LocalDateTime) {
+            } else if (cellValue instanceof Timestamp || cellValue instanceof LocalDateTime){
+                this.cellType = TIMESTAMP;
+            } else if (cellValue instanceof Date || cellValue instanceof LocalDate) {
                 this.cellType = DATE;
             } else if (cellValue instanceof Boolean) {
                 this.cellType = BOOLEAN;
@@ -342,6 +349,7 @@ public class DefaultCellGenerator implements CellGenerator, Comparable<DefaultCe
             cell.setCellType(BLANK);
         } else {
             switch (cellType) {
+                case TIMESTAMP:
                 case DATE:
                     cell.setCellType(CellType.NUMERIC);
                     cell.setCellValue(getDateValue());
@@ -412,11 +420,11 @@ public class DefaultCellGenerator implements CellGenerator, Comparable<DefaultCe
         }
         if (cellValue instanceof LocalDate) {
             LocalDate localDate = (LocalDate) cellValue;
-            return Date.from(localDate.atStartOfDay().toInstant(ZoneOffset.ofHours(-6)));
+            return java.sql.Date.valueOf(localDate);
         }
         if (cellValue instanceof LocalDateTime) {
             LocalDateTime localDateTime = (LocalDateTime) cellValue;
-            return Date.from(Instant.from(localDateTime));
+            return java.sql.Timestamp.valueOf(localDateTime);
         }
         if (cellValue instanceof String) {
             String stringValue = (String) cellValue;

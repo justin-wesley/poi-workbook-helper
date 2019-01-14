@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -53,6 +54,7 @@ class ReportGeneratorTest {
             .id(id)
             .name(RandomStringUtils.randomPrint(6,30))
             .birthdate(birthdate)
+            .now(LocalDateTime.now())
             .old(isOld)
             .averageScore(RandomUtils.nextDouble(56d, 300d))
             .bankBalance(RandomUtils.nextDouble(100d, 100_000d))

@@ -97,7 +97,14 @@ public class CellStyleManager {
         CellStyle cs = extendCSMap.computeIfAbsent(ecs, cs1 -> {
             CellStyle cellStyle = workbook.createCellStyle();
             IndexedColors backgroundColor = ecs.getBackgroundColor();
-            Integer dataFormat = ecs.getDataFormat();
+            Short dataFormat = ecs.getDataFormat();
+            if(dataFormat == null) {
+                String dataFormatString = ecs.getDataFormatString();
+                if(dataFormatString != null){
+                    DataFormat dataFormat1 = workbook.createDataFormat();
+                    dataFormat = dataFormat1.getFormat(dataFormatString);
+                }
+            }
             IndexedColors fontColor = ecs.getFontColor();
             Integer fontHeightInPoints = ecs.getFontHeightInPoints();
             String fontName = ecs.getFontName();
@@ -109,7 +116,7 @@ public class CellStyleManager {
             setProperty(cellStyle, backgroundColor, IndexedColors::getIndex, this::applyBackgroundColor);
             setProperty(verticalAlignment, cellStyle::setVerticalAlignment);
             setProperty(horizontalAlignment, cellStyle::setAlignment);
-            setProperty(dataFormat, Integer::shortValue, cellStyle::setDataFormat);
+            setProperty(dataFormat, cellStyle::setDataFormat);
             cellStyle.setWrapText(wrappedText);
             if (fontColor != null || fontHeightInPoints != null || fontName != null || bold || italic) {
                 Font font = workbook.createFont();

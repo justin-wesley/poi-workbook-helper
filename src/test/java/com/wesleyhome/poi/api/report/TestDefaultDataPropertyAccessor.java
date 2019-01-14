@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -18,6 +19,8 @@ class TestDefaultDataPropertyAccessor {
     private String name;
     @ReportColumn
     private LocalDate birthdate;
+    @ReportColumn
+    private LocalDateTime now;
     @ReportColumn
     private boolean old;
     @ReportColumn

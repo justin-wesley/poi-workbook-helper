@@ -32,7 +32,8 @@ public class ExtendedCellStyle {
     private IndexedColors leftBorderColor;
     private BorderStyle rightBorderStyle;
     private IndexedColors rightBorderColor;
-    private Integer dataFormat;
+    private Short dataFormat;
+    private String dataFormatString;
     private IndexedColors backgroundColor;
     private IndexedColors fontColor;
     private String fontName;
@@ -110,7 +111,7 @@ public class ExtendedCellStyle {
     }
 
     ExtendedCellStyle withFontSize(int fontHeightInPoints) {
-        return checkImmutable(t->t.fontHeightInPoints = fontHeightInPoints);
+        return checkImmutable(t -> t.fontHeightInPoints = fontHeightInPoints);
     }
 
     ExtendedCellStyle withBoldFont() {
@@ -130,7 +131,21 @@ public class ExtendedCellStyle {
     }
 
     public ExtendedCellStyle withDataFormat(int index) {
-        return checkImmutable(t -> t.dataFormat = index);
+        return checkImmutable(t -> {
+            if(t.dataFormatString != null){
+                throw new UnsupportedOperationException("Cannot set data format string and data format on same cell");
+            }
+            t.dataFormat = (short)index;
+        });
+    }
+
+    public ExtendedCellStyle withDataFormatString(String dfs) {
+        return checkImmutable(t -> {
+            if (t.dataFormat != null) {
+                throw new UnsupportedOperationException("Cannot set data format string and data format on same cell");
+            }
+            t.dataFormatString = dfs;
+        });
     }
 
     void markImmutable() {
@@ -150,6 +165,7 @@ public class ExtendedCellStyle {
             .applyIf(b::bottomBorderColor, c::getBottomBorderColor)
             .applyIf(b::bottomBorderStyle, c::getBottomBorderStyle)
             .applyIf(b::dataFormat, c::getDataFormat)
+            .applyIf(b::dataFormatString, c::getDataFormatString)
             .applyIf(b::fontColor, c::getFontColor)
             .applyIf(b::fontHeightInPoints, c::getFontHeightInPoints)
             .applyIf(b::fontName, c::getFontName)

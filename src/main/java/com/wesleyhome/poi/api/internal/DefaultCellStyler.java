@@ -52,7 +52,7 @@ public class DefaultCellStyler implements CellStyler {
 
     @Override
     public CellStyler withDateTimeFormat() {
-        return applyFormat("m/d/yy h:mm");
+        return applyFormat("m/d/yy h:mm AM/PM");
     }
 
     @Override
@@ -92,7 +92,7 @@ public class DefaultCellStyler implements CellStyler {
 
     @Override
     public CellStyler withFontSize(int fontHeightInPoints) {
-        return applyCellStyle(ecs->ecs.withFontSize(fontHeightInPoints));
+        return applyCellStyle(ecs -> ecs.withFontSize(fontHeightInPoints));
     }
 
     @Override
@@ -154,12 +154,15 @@ public class DefaultCellStyler implements CellStyler {
     }
 
     private CellStyler applyFormat(String fmt) {
-        int index = BuiltinFormats.getBuiltinFormat(fmt);
-        return applyCellStyle(ecs -> ecs.withDataFormat(index));
+
+        return applyCellStyle(ecs -> {
+            int builtinFormat = BuiltinFormats.getBuiltinFormat(fmt);
+            return builtinFormat < 0 ? ecs.withDataFormatString(fmt) : ecs.withDataFormat(builtinFormat);
+        });
     }
 
     private CellStyler applyCellStyle(Function<ExtendedCellStyle, ExtendedCellStyle> consumer) {
-        if(currentCellStyle.isImmutable()){
+        if (currentCellStyle.isImmutable()) {
             DefaultCellStyler defaultCellStyler = new DefaultCellStyler(this.styleName);
             return defaultCellStyler.applyCellStyle(consumer);
         }

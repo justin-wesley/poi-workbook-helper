@@ -3,6 +3,7 @@ package com.wesleyhome.poi.api.report;
 import com.wesleyhome.poi.api.CellGenerator;
 import com.wesleyhome.poi.api.CellStyler;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -108,22 +109,27 @@ public abstract class AbstractReportConfiguration<T> implements ReportConfigurat
         boolean isEven = rowNum % 2 == 0;
         List<String> styles = new ArrayList<>(getReportStyler().getRowStyles(isEven));
         ColumnType columnType = columnConfiguration.getColumnType();
-        if(ColumnType.DERIVED.equals(columnType) && transformedValue != null){
-            if (transformedValue instanceof Date || transformedValue instanceof LocalDateTime || transformedValue instanceof LocalDate) {
+        if (ColumnType.DERIVED.equals(columnType) && transformedValue != null) {
+            if (transformedValue instanceof Timestamp || transformedValue instanceof LocalDateTime) {
+                columnType = ColumnType.TIMESTAMP;
+            } else if (transformedValue instanceof Date || transformedValue instanceof LocalDate) {
                 columnType = ColumnType.DATE;
-            } else if(transformedValue instanceof Integer){
+            } else if (transformedValue instanceof Integer) {
                 columnType = ColumnType.INTEGER;
-            } else if(transformedValue instanceof Number) {
+            } else if (transformedValue instanceof Number) {
                 columnType = ColumnType.DECIMAL;
-            } else if(transformedValue instanceof Boolean) {
+            } else if (transformedValue instanceof Boolean) {
                 columnType = ColumnType.BOOLEAN;
-            } else{
+            } else {
                 columnType = ColumnType.TEXT;
             }
         }
         switch (columnType) {
             case DECIMAL:
                 styles.add(NUMERIC);
+                break;
+            case TIMESTAMP:
+                styles.add(DATE_TIME);
                 break;
             case DATE:
                 styles.add(DATE);
@@ -153,8 +159,6 @@ public abstract class AbstractReportConfiguration<T> implements ReportConfigurat
     public void createStyles(CellStyler cellStyler) {
         getReportStyler().createStyles(cellStyler.reset());
     }
-
-
 
 
 }

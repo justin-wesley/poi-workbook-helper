@@ -10,6 +10,7 @@ public enum ColumnType {
     ACCOUNTING,
     URL,
     DATE,
+    TIMESTAMP,
     FRACTION,
     SCI_NOTATION,
     BOOLEAN
