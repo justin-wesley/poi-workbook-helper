@@ -13,7 +13,11 @@ public class DefaultReportGenerator<T> implements ReportGenerator<T> {
         Map<String, String> columnHeaderMap = reportConfiguration.columnHeaders();
         return WorkbookGenerator.create(reportConfiguration.getReportSheetName())
             .generateStyles(reportConfiguration::createStyles)
-            .row()
+            .nextCell()
+            .usingStyle(reportConfiguration.getDescriptionStyle())
+            .mergeWithNextXCells(reportConfiguration.columns().size())
+            .havingValue(reportConfiguration.getReportDescription())
+            .nextRow().nextRow()
             .generateCells(columnHeaderMap.values(), ((cellGenerator, headerName) -> cellGenerator.autosize().usingStyle(reportConfiguration.getHeaderStyle()).havingValue(headerName))).nextRow()
             .generateRows(data, ((rowGenerator, value) -> rowGenerator
                 .generateCells(columnHeaderMap.keySet(), ((cellGenerator, columnIdentifier) -> this.generateValueRow(cellGenerator, columnIdentifier, reportConfiguration, value)))

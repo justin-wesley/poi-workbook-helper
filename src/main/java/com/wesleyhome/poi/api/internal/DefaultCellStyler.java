@@ -91,6 +91,11 @@ public class DefaultCellStyler implements CellStyler {
     }
 
     @Override
+    public CellStyler withFontSize(int fontHeightInPoints) {
+        return applyCellStyle(ecs->ecs.withFontSize(fontHeightInPoints));
+    }
+
+    @Override
     public CellStyler isBold() {
         return applyCellStyle(ExtendedCellStyle::withBold);
     }

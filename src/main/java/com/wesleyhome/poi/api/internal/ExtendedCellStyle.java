@@ -103,10 +103,14 @@ public class ExtendedCellStyle {
         return checkImmutable(t -> t.backgroundColor = null);
     }
 
-    // Font Properties
 
+    // Font Properties
     ExtendedCellStyle withFontColor(IndexedColors fontColor) {
         return checkImmutable(t -> t.fontColor = fontColor);
+    }
+
+    ExtendedCellStyle withFontSize(int fontHeightInPoints) {
+        return checkImmutable(t->t.fontHeightInPoints = fontHeightInPoints);
     }
 
     private ExtendedCellStyle withItalic() {

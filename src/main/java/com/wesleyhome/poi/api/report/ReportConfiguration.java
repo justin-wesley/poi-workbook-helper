@@ -2,7 +2,6 @@ package com.wesleyhome.poi.api.report;
 
 import com.wesleyhome.poi.api.CellGenerator;
 import com.wesleyhome.poi.api.CellStyler;
-import com.wesleyhome.poi.api.internal.DefaultWorkbookGenerator;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 
@@ -12,27 +11,19 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.wesleyhome.poi.api.internal.DefaultWorkbookGenerator.BuiltinStyles.*;
-import static com.wesleyhome.poi.api.internal.DefaultWorkbookGenerator.BuiltinStyles.DATE;
 
 public interface ReportConfiguration<T> {
 
+    String REPORT_DESCRIPTION = "REPORT_DESCRIPTION";
     String COLUMN_HEADER = "COLUMN_HEADER";
     String EVEN_ROW = "EVEN_ROW";
     String ODD_ROW = "ODD_ROW";
 
     SortedMap<String, ColumnConfiguration<T>> columns();
 
-    default ColumnConfiguration<T> getColumnConfiguration(String columnIdentifier) {
-        return columns().get(columnIdentifier);
-    }
-
     String getReportSheetName();
 
-    default Map<String, String> columnHeaders() {
-        return columns().values()
-            .stream()
-            .collect(Collectors.toMap(ColumnConfiguration::getColumnName, ColumnConfiguration::getColumnHeader));
-    }
+    String getReportDescription();
 
     IndexedColors headerBackgroundColor();
 
@@ -51,6 +42,16 @@ public interface ReportConfiguration<T> {
     IndexedColors oddRowFontColor();
 
     boolean isOddRowBold();
+
+    default ColumnConfiguration<T> getColumnConfiguration(String columnIdentifier) {
+        return columns().get(columnIdentifier);
+    }
+
+    default Map<String, String> columnHeaders() {
+        return columns().values()
+            .stream()
+            .collect(Collectors.toMap(ColumnConfiguration::getColumnName, ColumnConfiguration::getColumnHeader));
+    }
 
     default CellGenerator applyStyleAndValueToCell(CellGenerator cellGenerator, ColumnConfiguration<T> columnConfiguration, Object transformedValue) {
         int rowNum = cellGenerator.rowNum();
@@ -102,6 +103,10 @@ public interface ReportConfiguration<T> {
 
     default void createStyles(CellStyler cellStyler) {
         cellStyler
+            .isBold()
+            .withFontSize(36)
+            .as(REPORT_DESCRIPTION)
+            .reset()
             .withBackgroundColor(headerBackgroundColor())
             .withFontColor(headerFontColor())
             .withHorizontalAlignment(HorizontalAlignment.CENTER)
@@ -122,5 +127,9 @@ public interface ReportConfiguration<T> {
 
     default String getHeaderStyle() {
         return COLUMN_HEADER;
+    }
+
+    default String getDescriptionStyle() {
+        return REPORT_DESCRIPTION;
     }
 }

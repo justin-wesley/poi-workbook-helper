@@ -31,6 +31,8 @@ public interface CellStyler {
 
     CellStyler withFontColor(IndexedColors color);
 
+    CellStyler withFontSize(int fontSize);
+
     CellStyler isBold();
 
     CellStyler notBold();

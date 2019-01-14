@@ -24,6 +24,7 @@ public class AnnotatedReportConfiguration<T> implements ReportConfiguration<T> {
     private final Class<T> reportClass;
     private final ReportStyler reportStyler;
     private final String sheetName;
+    private final String reportDescription;
     private final SafeLazyInitializer<SortedMap<String, ColumnConfiguration<T>>> columnInitializer;
 
     public AnnotatedReportConfiguration(Class<T> reportClass) {
@@ -33,7 +34,9 @@ public class AnnotatedReportConfiguration<T> implements ReportConfiguration<T> {
             throw new NullPointerException("Report annotation required");
         }
         String _sheetName = annotation.sheetName();
+        String _description = annotation.description();
         sheetName = Report.NULL.equals(_sheetName) ? this.reportClass.getSimpleName() : _sheetName;
+        reportDescription = Report.NULL.equals(_description) ? null : _description;
         try {
             reportStyler = ConstructorUtils.invokeConstructor(annotation.styler());
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
@@ -81,6 +84,11 @@ public class AnnotatedReportConfiguration<T> implements ReportConfiguration<T> {
     @Override
     public String getReportSheetName() {
         return this.sheetName;
+    }
+
+    @Override
+    public String getReportDescription() {
+        return this.reportDescription == null ? getReportSheetName() : this.reportDescription;
     }
 
     @Override

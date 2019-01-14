@@ -13,6 +13,8 @@ public @interface Report {
 
     String sheetName() default NULL;
 
+    String description() default NULL;
+
     Class<? extends ReportStyler> styler() default DefaultReportStyler.class;
 
     class DefaultReportStyler implements ReportStyler{}
