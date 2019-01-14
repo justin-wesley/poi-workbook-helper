@@ -14,11 +14,11 @@ public class DefaultReportGenerator<T> implements ReportGenerator<T> {
         return WorkbookGenerator.create(reportConfiguration.getReportSheetName())
             .generateStyles(reportConfiguration::createStyles)
             .nextCell()
-            .usingStyle(reportConfiguration.getDescriptionStyle())
-            .mergeWithNextXCells(reportConfiguration.columns().size())
+            .usingStyle(reportConfiguration.getDescriptionStyleName())
+            .mergeWithNextXCells(reportConfiguration.columns().size()-1)
             .havingValue(reportConfiguration.getReportDescription())
             .nextRow().nextRow()
-            .generateCells(columnHeaderMap.values(), ((cellGenerator, headerName) -> cellGenerator.autosize().usingStyle(reportConfiguration.getHeaderStyle()).havingValue(headerName))).nextRow()
+            .generateCells(columnHeaderMap.values(), ((cellGenerator, headerName) -> cellGenerator.autosize().usingStyle(reportConfiguration.getHeaderStyleName()).havingValue(headerName))).nextRow()
             .generateRows(data, ((rowGenerator, value) -> rowGenerator
                 .generateCells(columnHeaderMap.keySet(), ((cellGenerator, columnIdentifier) -> this.generateValueRow(cellGenerator, columnIdentifier, reportConfiguration, value)))
                 .row())).createWorkbook();

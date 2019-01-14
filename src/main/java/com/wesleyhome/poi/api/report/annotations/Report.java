@@ -1,5 +1,6 @@
 package com.wesleyhome.poi.api.report.annotations;
 
+import com.wesleyhome.poi.api.report.DefaultReportStyler;
 import com.wesleyhome.poi.api.report.ReportStyler;
 
 import java.lang.annotation.*;
@@ -17,5 +18,4 @@ public @interface Report {
 
     Class<? extends ReportStyler> styler() default DefaultReportStyler.class;
 
-    class DefaultReportStyler implements ReportStyler{}
 }

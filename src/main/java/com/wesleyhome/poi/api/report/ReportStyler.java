@@ -1,42 +1,16 @@
 package com.wesleyhome.poi.api.report;
 
-import org.apache.poi.ss.usermodel.IndexedColors;
+import com.wesleyhome.poi.api.CellStyler;
+
+import java.util.List;
 
 public interface ReportStyler {
-    default IndexedColors headerBackgroundColor() {
-        return IndexedColors.DARK_BLUE;
-    }
 
-    default IndexedColors headerFontColor() {
-        return IndexedColors.WHITE;
-    }
+    void createStyles(CellStyler reset);
 
-    default boolean isHeaderBold() {
-        return true;
-    }
+    List<String> getRowStyles(boolean isEven);
 
-    default IndexedColors oddRowBackgroundColor() {
-        return IndexedColors.WHITE;
-    }
+    String getHeaderStyleName();
 
-    default IndexedColors oddRowFontColor() {
-        return IndexedColors.BLACK;
-    }
-
-    default boolean isEvenRowBold(){
-        return false;
-    }
-
-    default IndexedColors evenRowBackgroundColor() {
-        return IndexedColors.LIGHT_CORNFLOWER_BLUE;
-    }
-
-    default IndexedColors evenRowFontColor() {
-        return IndexedColors.BLACK;
-    }
-
-    default boolean isOddRowBold(){
-        return false;
-    }
-
+    String getDescriptionStyleName();
 }
