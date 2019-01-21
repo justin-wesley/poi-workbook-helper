@@ -2,6 +2,7 @@ package com.wesleyhome.poi.api.report;
 
 import com.wesleyhome.poi.api.CellGenerator;
 import com.wesleyhome.poi.api.CellStyler;
+import com.wesleyhome.poi.api.internal.TableConfiguration;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -16,6 +17,7 @@ public abstract class AbstractReportConfiguration<T> implements ReportConfigurat
     private final SafeLazyInitializer<ReportStyler> reportStylerInitializer;
     private final SafeLazyInitializer<SortedMap<String, ColumnConfiguration<T>>> columnInitializer;
     private final SafeLazyInitializer<String> reportTitleInitializer;
+    private final SafeLazyInitializer<TableConfiguration> tableConfigurationInitializer;
 
     public AbstractReportConfiguration() {
         this.columnInitializer = new SafeLazyInitializer<SortedMap<String, ColumnConfiguration<T>>>() {
@@ -48,9 +50,31 @@ public abstract class AbstractReportConfiguration<T> implements ReportConfigurat
                 return initializeReportDescription();
             }
         };
+        this.tableConfigurationInitializer = new SafeLazyInitializer<TableConfiguration>() {
+            @Override
+            protected TableConfiguration safeInitialize() {
+                return initializeTableConfiguration();
+            }
+        };
     }
 
-    protected abstract String initializeReportTitle();
+    @Override
+    public TableConfiguration getTableConfiguration() {
+        return this.tableConfigurationInitializer.get();
+    }
+
+    protected TableConfiguration initializeTableConfiguration() {
+        return unsupported("TableConfiguration");
+    }
+
+    @Override
+    public String getReportTitle() {
+        return this.reportTitleInitializer.get();
+    }
+
+    protected String initializeReportTitle() {
+        return unsupported("ReportTitle");
+    }
 
     protected abstract String initializeReportDescription();
 
@@ -75,11 +99,6 @@ public abstract class AbstractReportConfiguration<T> implements ReportConfigurat
     }
 
     @Override
-    public String getReportTitle() {
-        return this.reportTitleInitializer.get();
-    }
-
-    @Override
     public String getReportTitleStyleName() {
         return getReportStyler().getReportTitleStyleName();
     }
@@ -95,19 +114,13 @@ public abstract class AbstractReportConfiguration<T> implements ReportConfigurat
     }
 
     @Override
-    public String getColumnHeaderStyleName() {
-        return getReportStyler().getHeaderStyleName();
-    }
-
-    @Override
     public String getReportDescriptionDetailStyleName() {
         return getReportStyler().getDescriptionStyleName();
     }
 
     public CellGenerator applyStyleAndValueToCell(CellGenerator cellGenerator, ColumnConfiguration<T> columnConfiguration, Object transformedValue) {
         int rowNum = cellGenerator.rowNum();
-        boolean isEven = rowNum % 2 == 0;
-        List<String> styles = new ArrayList<>(getReportStyler().getRowStyles(isEven));
+        List<String> styles = new ArrayList<>();
         ColumnType columnType = columnConfiguration.getColumnType();
         if (ColumnType.DERIVED.equals(columnType) && transformedValue != null) {
             if (transformedValue instanceof Timestamp || transformedValue instanceof LocalDateTime) {
@@ -158,6 +171,10 @@ public abstract class AbstractReportConfiguration<T> implements ReportConfigurat
 
     public void createStyles(CellStyler cellStyler) {
         getReportStyler().createStyles(cellStyler.reset());
+    }
+
+    private <T> T unsupported(String property) {
+        throw new UnsupportedOperationException(String.format("You must override get%1$s or initialize%1$s", property));
     }
 
 

@@ -36,6 +36,7 @@ public class DefaultWorkbookGenerator implements WorkbookGenerator {
     private ExtendedMap<String, DefaultSheetGenerator> sheets;
     private DefaultSheetGenerator workingSheet;
     private CellStyler cellStyler;
+    private Table table;
 
     public DefaultWorkbookGenerator(WorkbookType workbookType) {
         this.workbookType = workbookType;
@@ -124,6 +125,11 @@ public class DefaultWorkbookGenerator implements WorkbookGenerator {
     }
 
     @Override
+    public WorkbookType getWorkbookType() {
+        return workbookType;
+    }
+
+    @Override
     public RowGenerator nextRow() {
         return workingSheet.nextRow();
     }
@@ -166,5 +172,15 @@ public class DefaultWorkbookGenerator implements WorkbookGenerator {
     @Override
     public String toString() {
         return this.sheets.values().stream().map(Object::toString).collect(Collectors.joining(","));
+    }
+
+    @Override
+    public CellGenerator startTable() {
+        return sheet().startTable();
+    }
+
+    @Override
+    public CellGenerator endTable(TableConfiguration tableConfiguration) {
+        return sheet().endTable(tableConfiguration);
     }
 }

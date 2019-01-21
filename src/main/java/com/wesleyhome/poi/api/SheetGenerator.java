@@ -1,6 +1,7 @@
 package com.wesleyhome.poi.api;
 
 import com.wesleyhome.poi.api.creator.WorkbookCreator;
+import com.wesleyhome.poi.api.internal.TableConfiguration;
 
 import java.util.Iterator;
 import java.util.function.BiFunction;

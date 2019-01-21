@@ -35,6 +35,7 @@ class ReportGeneratorTest {
         try(OutputStream os = Files.newOutputStream(reportPath); Workbook workbook = defaultDataReportGenerator.generateWorkbook(records, reportConfiguration)){
             workbook.write(os);
         }
+        System.out.println(reportPath.toAbsolutePath());
         Desktop.getDesktop().open(reportPath.toFile());
     }
 

@@ -128,6 +128,21 @@ public class DefaultRowGenerator implements RowGenerator {
     }
 
     @Override
+    public CellGenerator startTable() {
+        return this.sheetGenerator.startTable();
+    }
+
+    @Override
+    public CellGenerator endTable(TableConfiguration tableConfiguration) {
+        return this.sheetGenerator.endTable(tableConfiguration);
+    }
+
+    @Override
+    public WorkbookType getWorkbookType() {
+        return this.sheetGenerator.getWorkbookType();
+    }
+
+    @Override
     public String toString() {
         return this.cells.values().stream().map(Object::toString).collect(Collectors.joining(","));
     }

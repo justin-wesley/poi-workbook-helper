@@ -1,9 +1,17 @@
 package com.wesleyhome.poi.api.internal;
 
 import com.wesleyhome.poi.api.*;
+import com.wesleyhome.poi.api.report.annotations.TotalsRowFunction;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.AreaReference;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFTable;
+import org.apache.poi.xssf.usermodel.XSSFTableStyleInfo;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.*;
 
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
@@ -16,6 +24,8 @@ public class DefaultSheetGenerator implements SheetGenerator {
     private final ExtendedMap<Integer, DefaultRowGenerator> rows;
     private Set<Integer> autosizeColumns;
     private Set<Integer> hiddenColumns;
+    private Table table;
+    private TableConfiguration tableConfiguration;
 
     public DefaultSheetGenerator(WorkbookGenerator workbookGenerator, String sheetName) {
         this.workbookGenerator = workbookGenerator;
@@ -68,7 +78,7 @@ public class DefaultSheetGenerator implements SheetGenerator {
 
     @Override
     public RowGenerator row() {
-        if(this.workingRow == null){
+        if (this.workingRow == null) {
             return nextRow();
         }
         return this.workingRow;
@@ -109,14 +119,6 @@ public class DefaultSheetGenerator implements SheetGenerator {
         return this.workbookGenerator.cellStyler();
     }
 
-    public void applySheet(Workbook workbook) {
-        Sheet sheet = workbook.createSheet(this.sheetName);
-        rows.values()
-            .forEach(rowGen -> rowGen.applyRow(sheet));
-        autosizeColumns.forEach(colNum->sheet.autoSizeColumn(colNum, true));
-        hiddenColumns.forEach(colNum->sheet.setColumnHidden(colNum, true));
-    }
-
     @Override
     public SheetGenerator autosize(int columnNum) {
         this.autosizeColumns.add(columnNum);
@@ -137,6 +139,96 @@ public class DefaultSheetGenerator implements SheetGenerator {
     @Override
     public int columnNum() {
         return workingRow.columnNum();
+    }
+
+    @Override
+    public CellGenerator startTable() {
+        CellGenerator currentCell = this.cell();
+        switch (getWorkbookType()) {
+            case EXCEL_OPEN:
+                table = new Table(currentCell);
+                break;
+            default:
+                System.err.printf("%s don't have the ability to create tables.%n", getWorkbookType());
+                break;
+        }
+        return currentCell;
+    }
+
+    @Override
+    public CellGenerator endTable(TableConfiguration tableConfiguration) {
+        this.tableConfiguration = tableConfiguration;
+        CellGenerator currentCell = this.cell();
+        switch (getWorkbookType()) {
+            case EXCEL_OPEN:
+                    table.setEndCell(currentCell);
+                break;
+            default:
+                System.err.printf("%s don't have the ability to create tables.%n", getWorkbookType());
+                break;
+        }
+        return currentCell;
+    }
+
+
+    @Override
+    public WorkbookType getWorkbookType() {
+        return this.workbookGenerator.getWorkbookType();
+    }
+
+
+    public void applySheet(Workbook workbook) {
+        Sheet sheet = workbook.createSheet(this.sheetName);
+        rows.values()
+            .forEach(rowGen -> rowGen.applyRow(sheet));
+        autosizeColumns.forEach(colNum -> sheet.autoSizeColumn(colNum, true));
+        hiddenColumns.forEach(colNum -> sheet.setColumnHidden(colNum, true));
+        if (this.table != null && this.table.isValid()) {
+            switch (getWorkbookType()) {
+                case EXCEL_OPEN:
+                    XSSFSheet xssfSheet = (XSSFSheet) sheet;
+                    createTable(xssfSheet);
+                    break;
+                case EXCEL_STREAM:
+                default:
+                    break;
+            }
+        }
+    }
+
+    private void createTable(XSSFSheet xssfSheet) {
+        TableStyle tableStyle = this.tableConfiguration.getTableStyle();
+        boolean hasTotalRow = this.tableConfiguration.hasTotalRow();
+        XSSFTable table = xssfSheet.createTable(this.table.getAreaReference(false, xssfSheet.getWorkbook()));
+        String tableStyleString = tableStyle.toString();
+        CTTable ctTable = table.getCTTable();
+        ctTable.addNewAutoFilter();
+//        if(hasTotalRow) {
+//            ctTable.setTotalsRowCount(1L);
+//            ctTable.setTotalsRowShown(true);
+//            CTTableColumns tableColumns = ctTable.getTableColumns();
+//            List<CTTableColumn> tableColumnList = tableColumns.getTableColumnList();
+//            ListIterator<CTTableColumn> itr = tableColumnList.listIterator();
+//            List<TotalsRowFunction> totalRowFunctions = this.tableConfiguration.getTotalRowFunctions();
+//            while(itr.hasNext()){
+//                TotalsRowFunction function = totalRowFunctions.get(itr.nextIndex());
+//                CTTableColumn column = itr.next();
+//                if(!TotalsRowFunction.F_NONE.equals(function)) {
+//                    column.setTotalsRowFunction(function.getFunctionEnum());
+//                    column.setT
+//                }
+//            }
+//        }
+        table.setName("Table1");
+        table.setDisplayName("Data_Table");
+        CTTableStyleInfo tableStyleInfo = ctTable.addNewTableStyleInfo();
+        tableStyleInfo.setName(tableStyleString);
+        XSSFTableStyleInfo style = (XSSFTableStyleInfo) table.getStyle();
+        style.setShowColumnStripes(false);
+        style.setShowRowStripes(true);
+        style.setFirstColumn(false);
+        style.setLastColumn(false);
+        style.setShowRowStripes(true);
     }
 
     @Override

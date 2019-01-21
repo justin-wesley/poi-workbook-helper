@@ -4,8 +4,6 @@ import com.wesleyhome.poi.api.CellStyler;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.function.Function;
 
 public class DefaultReportStyler implements ReportStyler {
@@ -13,18 +11,13 @@ public class DefaultReportStyler implements ReportStyler {
     private static String REPORT_TITLE = "REPORT_TITLE";
     private static String REPORT_DESCRIPTION_DETAILS = "REPORT_DESCRIPTION_DETAILS";
     private static String COLUMN_HEADER = "COLUMN_HEADER";
-    private static String EVEN_ROW = "EVEN_ROW";
-    private static String ODD_ROW = "ODD_ROW";
+//    private static String EVEN_ROW = "EVEN_ROW";
+//    private static String ODD_ROW = "ODD_ROW";
 
-    @Override
-    public List<String> getRowStyles(boolean isEven) {
-        return Arrays.asList(isEven ? EVEN_ROW : ODD_ROW);
-    }
-
-    @Override
-    public String getHeaderStyleName() {
-        return COLUMN_HEADER;
-    }
+//    @Override
+//    public List<String> getRowStyles(boolean isEven) {
+//        return Arrays.asList(isEven ? EVEN_ROW : ODD_ROW);
+//    }
 
     @Override
     public String getDescriptionStyleName() {
@@ -40,28 +33,30 @@ public class DefaultReportStyler implements ReportStyler {
     public void createStyles(CellStyler cellStyler) {
         cellStyler.applyIf(true, createReportTitleStyle()).reset()
             .applyIf(true, createReportDetailsStyle()).reset()
-            .applyIf(true, createColumnHeaderStyle()).reset()
-            .applyIf(true, createEvenRowStyle()).reset()
-            .applyIf(true, createOddRowStyle());
+            .applyIf(true, createColumnHeaderStyle())
+            .reset()
+//            .applyIf(true, createEvenRowStyle()).reset()
+//            .applyIf(true, createOddRowStyle())
+        ;
     }
 
     private Function<CellStyler, CellStyler> createReportDetailsStyle() {
         return cs -> cs.withItalicFont().withFontSize(10).as(REPORT_DESCRIPTION_DETAILS);
     }
 
-    protected Function<CellStyler, CellStyler> createOddRowStyle() {
-        return cs -> cs.withBackgroundColor(oddRowBackgroundColor())
-            .withFontColor(oddRowFontColor())
-            .applyIf(isOddRowBold(), CellStyler::withBoldFont)
-            .as(ODD_ROW);
-    }
-
-    protected Function<CellStyler, CellStyler> createEvenRowStyle() {
-        return cs -> cs.withBackgroundColor(evenRowBackgroundColor())
-            .withFontColor(evenRowFontColor())
-            .applyIf(isEvenRowBold(), CellStyler::withBoldFont)
-            .as(EVEN_ROW);
-    }
+//    protected Function<CellStyler, CellStyler> createOddRowStyle() {
+//        return cs -> cs.withBackgroundColor(oddRowBackgroundColor())
+//            .withFontColor(oddRowFontColor())
+//            .applyIf(isOddRowBold(), CellStyler::withBoldFont)
+//            .as(ODD_ROW);
+//    }
+//
+//    protected Function<CellStyler, CellStyler> createEvenRowStyle() {
+//        return cs -> cs.withBackgroundColor(evenRowBackgroundColor())
+//            .withFontColor(evenRowFontColor())
+//            .applyIf(isEvenRowBold(), CellStyler::withBoldFont)
+//            .as(EVEN_ROW);
+//    }
 
     protected Function<CellStyler, CellStyler> createColumnHeaderStyle() {
         return cs -> cs.withBackgroundColor(headerBackgroundColor())

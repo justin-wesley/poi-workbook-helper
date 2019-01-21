@@ -25,13 +25,16 @@ public class DefaultReportGenerator<T> implements ReportGenerator<T> {
                 .nextRow().cell()
             )
             .nextRow()
-            .generateCells(columnHeaderMap.values(), ((cellGenerator, headerName) -> cellGenerator.autosize().usingStyle(reportConfiguration.getColumnHeaderStyleName()).havingValue(headerName))).nextRow()
+            .startTable()
+            .generateCells(columnHeaderMap.values(), ((cellGenerator, headerName) -> cellGenerator.autosize().havingValue(headerName))).nextRow()
             .generateRows(data, ((rowGenerator, value) -> rowGenerator
-                .generateCells(columnHeaderMap.keySet(), ((cellGenerator, columnIdentifier) -> this.generateValueRow(cellGenerator, columnIdentifier, reportConfiguration, value)))
-                .row())).createWorkbook();
+                .generateCells(columnHeaderMap.keySet(), ((cellGenerator, columnIdentifier) -> this.generateValueCell(cellGenerator, columnIdentifier, reportConfiguration, value)))
+                .row()))
+            .endTable(reportConfiguration.getTableConfiguration())
+            .createWorkbook();
     }
 
-    private CellGenerator generateValueRow(CellGenerator cellGenerator, String columnIdentifier, ReportConfiguration<T> reportConfiguration, T value) {
+    private CellGenerator generateValueCell(CellGenerator cellGenerator, String columnIdentifier, ReportConfiguration<T> reportConfiguration, T value) {
         ColumnConfiguration<T> columnConfiguration = reportConfiguration.getColumnConfiguration(columnIdentifier);
         Object transformedValue = columnConfiguration.getColumnValue(value);
         return reportConfiguration.applyStyleAndValueToCell(cellGenerator, columnConfiguration, transformedValue);

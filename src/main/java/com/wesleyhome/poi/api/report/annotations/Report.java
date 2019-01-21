@@ -1,9 +1,12 @@
 package com.wesleyhome.poi.api.report.annotations;
 
+import com.wesleyhome.poi.api.TableStyle;
 import com.wesleyhome.poi.api.report.DefaultReportStyler;
 import com.wesleyhome.poi.api.report.ReportStyler;
 
 import java.lang.annotation.*;
+
+import static com.wesleyhome.poi.api.TableStyle.TABLE_STYLE_MEDIUM_6;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
@@ -20,4 +23,5 @@ public @interface Report {
 
     Class<? extends ReportStyler> styler() default DefaultReportStyler.class;
 
+    TableStyle tableStyle() default TABLE_STYLE_MEDIUM_6;
 }

@@ -1,6 +1,7 @@
 package com.wesleyhome.poi.api.creator;
 
 import com.wesleyhome.poi.api.*;
+import com.wesleyhome.poi.api.internal.TableConfiguration;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -38,6 +39,10 @@ public interface WorkbookCreator {
 
     int columnNum();
 
+    CellGenerator startTable();
+
+    CellGenerator endTable(TableConfiguration tableConfiguration);
+
     default CellGenerator cell(String cellName){
         Matcher matcher = CellNameHelper.CELL_PATTERN.matcher(cellName);
         if(matcher.matches()) {
@@ -56,4 +61,7 @@ public interface WorkbookCreator {
         CellAddress last = new CellAddress(cellRangeAddress.getLastRow(), cellRangeAddress.getLastColumn());
         return String.format("%s:%s", first.formatAsString(), last.formatAsString());
     }
+
+    WorkbookType getWorkbookType();
+
 }

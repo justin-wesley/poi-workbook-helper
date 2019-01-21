@@ -121,6 +121,16 @@ public class DefaultCellGenerator implements CellGenerator, Comparable<DefaultCe
         return this;
     }
 
+    @Override
+    public CellGenerator startTable() {
+        return this.rowGenerator.startTable();
+    }
+
+    @Override
+    public CellGenerator endTable(TableConfiguration tableConfiguration) {
+        return this.rowGenerator.endTable(tableConfiguration);
+    }
+
     public void checkCellType(Class<?> cellValueClass, boolean validState) {
         if (!validState) {
             throw new IllegalArgumentException(String.format("Cell value has been assigned a cell type and value does not match type. %s != %s", cellType, cellValueClass));
@@ -446,4 +456,11 @@ public class DefaultCellGenerator implements CellGenerator, Comparable<DefaultCe
     public String toString() {
         return String.format("[%s]->%s", this.cellAddress().formatAsString(), Objects.toString(this.cellValue, ""));
     }
+
+
+    @Override
+    public WorkbookType getWorkbookType() {
+        return this.rowGenerator.getWorkbookType();
+    }
+
 }

@@ -1,18 +1,14 @@
 package com.wesleyhome.poi.api.report;
 
+import com.wesleyhome.poi.api.TableStyle;
+import com.wesleyhome.poi.api.internal.TableConfiguration;
 import com.wesleyhome.poi.api.report.annotations.Report;
 import com.wesleyhome.poi.api.report.annotations.ReportColumn;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.poi.ss.util.CellReference;
 
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Comparator;
-import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.lang.reflect.*;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -64,11 +60,7 @@ public class AnnotatedReportConfiguration<T> extends AbstractReportConfiguration
 
     @Override
     protected SortedMap<String, ColumnConfiguration<T>> initializeColumns() {
-        List<AbstractAnnotatedColumnConfiguration<T, ? extends AccessibleObject>> columnConfigurations = ReflectionHelper.getAnnotatedMembers(reportClass, ReportColumn.class)
-            .stream()
-            .map(member -> member instanceof Field ? new FieldColumnConfiguration<T>((Field) member) : new MethodColumnConfiguration<T>((Method) member))
-            .sorted()
-            .collect(Collectors.toList());
+        List<AbstractAnnotatedColumnConfiguration<T, ? extends AccessibleObject>> columnConfigurations = getAnnotatedColumns();
         AtomicInteger nextColumn = columnConfigurations.stream()
             .filter(c -> !ReportColumn.NULL.equals(c.getColumnName()))
             .max(Comparator.naturalOrder())
@@ -89,5 +81,19 @@ public class AnnotatedReportConfiguration<T> extends AbstractReportConfiguration
                 toMap(ColumnConfiguration::getColumnName, c -> c),
                 TreeMap::new
             ));
+    }
+
+    private List<AbstractAnnotatedColumnConfiguration<T, ? extends AccessibleObject>> getAnnotatedColumns() {
+        return ReflectionHelper.getAnnotatedMembers(reportClass, ReportColumn.class)
+                .stream()
+                .map(member -> member instanceof Field ? new FieldColumnConfiguration<T>((Field) member) : new MethodColumnConfiguration<T>((Method) member))
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    protected TableConfiguration initializeTableConfiguration() {
+        List<AnnotatedElement> annotatedMembers = new ArrayList<>(ReflectionHelper.getAnnotatedMembers(reportClass, ReportColumn.class));
+        return new AnnotatedTableConfiguration(reportAnnotation, annotatedMembers);
     }
 }

@@ -13,18 +13,18 @@ import static java.util.stream.Collectors.*;
 
 final class ReflectionHelper {
 
-    public static <A extends Annotation> List<Member> getAnnotatedMembers(Class<?> annotatedClass, Class<A> annotationClass) {
+    public static <A extends Annotation, M extends Member & AnnotatedElement> List<M> getAnnotatedMembers(Class<?> annotatedClass, Class<A> annotationClass) {
         Predicate<Method> get = m -> m.getName().startsWith("get") || m.getReturnType().equals(Boolean.TYPE) && m.getName().startsWith("is");
         List<Field> fields = getFields(annotatedClass, null, annotatedPredicate(annotationClass));
         List<Method> methods = getMethods(annotatedClass, null, get.and(annotatedPredicate(annotationClass)));
-        Stream<Field> fieldStream = fields.stream();
-        Stream<Method> methodStream = methods.stream();
-        Stream<? extends Member> concat = Stream.concat(fieldStream, methodStream);
+        Stream<M> fieldStream = fields.stream().map(f->(M)f);
+        Stream<M> methodStream = methods.stream().map(f->(M)f);
+        Stream<M> concat = Stream.concat(fieldStream, methodStream);
         return concat
             .collect(
             collectingAndThen(
                 collectingAndThen(
-                    toMap(Member::getName, m -> (Member) m, (m1, m2) -> m2 instanceof Field ? m2 : m1),
+                    toMap(Member::getName, m -> (M) m, (m1, m2) -> m2 instanceof Field ? m2 : m1),
                     Map::values
                 ),
                 ArrayList::new

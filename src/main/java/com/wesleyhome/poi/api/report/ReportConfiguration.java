@@ -2,6 +2,7 @@ package com.wesleyhome.poi.api.report;
 
 import com.wesleyhome.poi.api.CellGenerator;
 import com.wesleyhome.poi.api.CellStyler;
+import com.wesleyhome.poi.api.internal.TableConfiguration;
 
 import java.util.Map;
 import java.util.SortedMap;
@@ -25,8 +26,6 @@ public interface ReportConfiguration<T> {
 
     void createStyles(CellStyler cellStyler);
 
-    String getColumnHeaderStyleName();
-
     default ColumnConfiguration<T> getColumnConfiguration(String columnIdentifier) {
         return columns().get(columnIdentifier);
     }
@@ -38,4 +37,6 @@ public interface ReportConfiguration<T> {
     }
 
     boolean hasReportDescriptionDetails();
+
+    TableConfiguration getTableConfiguration();
 }

@@ -2,6 +2,7 @@ package com.wesleyhome.poi.api.report;
 
 import com.wesleyhome.poi.api.report.annotations.Report;
 import com.wesleyhome.poi.api.report.annotations.ReportColumn;
+import com.wesleyhome.poi.api.report.annotations.TotalsRowFunction;
 import lombok.Builder;
 import lombok.Data;
 
@@ -13,20 +14,20 @@ import java.time.LocalDateTime;
 @Report
 class TestDefaultDataPropertyAccessor {
 
-    @ReportColumn
+    @ReportColumn(columnIdentifier = "A")
     private Integer id;
-    @ReportColumn
+    @ReportColumn(columnIdentifier = "B")
     private String name;
-    @ReportColumn
+    @ReportColumn(columnIdentifier = "C")
     private LocalDate birthdate;
-    @ReportColumn
+    @ReportColumn(columnIdentifier = "D")
     private LocalDateTime now;
-    @ReportColumn
+    @ReportColumn(columnIdentifier = "E")
     private boolean old;
-    @ReportColumn
+    @ReportColumn(columnIdentifier = "F", totalFunction = TotalsRowFunction.F_SUM)
     private Double averageScore;
-    @ReportColumn
+    @ReportColumn(columnIdentifier = "G", totalFunction = TotalsRowFunction.F_AVERAGE)
     private Double bankBalance;
-    @ReportColumn
+    @ReportColumn(columnIdentifier = "H")
     private String website;
 }
