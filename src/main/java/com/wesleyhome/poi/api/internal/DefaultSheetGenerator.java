@@ -214,8 +214,8 @@ public class DefaultSheetGenerator implements SheetGenerator {
 //                }
 //            }
 //        }
-        table.setName(xssfSheet.getSheetName()+"_Table1");
-        table.setDisplayName(xssfSheet.getSheetName()+"_Data_Table");
+        table.setName(this.tableConfiguration.getTableName());
+        table.setDisplayName(this.tableConfiguration.getTableName()+"_Data_Table");
         CTTableStyleInfo tableStyleInfo = ctTable.addNewTableStyleInfo();
         tableStyleInfo.setName(tableStyleString);
         XSSFTableStyleInfo style = (XSSFTableStyleInfo) table.getStyle();

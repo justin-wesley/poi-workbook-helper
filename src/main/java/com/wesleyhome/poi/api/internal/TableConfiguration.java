@@ -16,4 +16,6 @@ public interface TableConfiguration {
     default List<TotalsRowFunction> getTotalRowFunctions() {
         return new ArrayList();
     }
+
+    String getTableName();
 }
