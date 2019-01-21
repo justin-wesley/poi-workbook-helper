@@ -1,20 +1,16 @@
 package com.wesleyhome.poi.api.internal;
 
 import com.wesleyhome.poi.api.*;
-import com.wesleyhome.poi.api.report.annotations.TotalsRowFunction;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.AreaReference;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFTable;
 import org.apache.poi.xssf.usermodel.XSSFTableStyleInfo;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.*;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTTable;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTTableStyleInfo;
 
-import java.util.List;
-import java.util.ListIterator;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.function.Consumer;
 
 public class DefaultSheetGenerator implements SheetGenerator {
     private final WorkbookGenerator workbookGenerator;
@@ -33,12 +29,6 @@ public class DefaultSheetGenerator implements SheetGenerator {
         this.rows = new ExtendedTreeMap<>();
         this.autosizeColumns = new TreeSet<>();
         this.hiddenColumns = new TreeSet<>();
-    }
-
-    @Override
-    public SheetGenerator generateStyles(Consumer<CellStyler> cellStyler) {
-        cellStyler.accept(this.workbookGenerator.cellStyler());
-        return this;
     }
 
     @Override
@@ -69,6 +59,11 @@ public class DefaultSheetGenerator implements SheetGenerator {
     @Override
     public SheetGenerator sheet(String sheetName) {
         return workbookGenerator.sheet(sheetName);
+    }
+
+    @Override
+    public SheetGenerator sheet() {
+        return this;
     }
 
     @Override
@@ -149,7 +144,7 @@ public class DefaultSheetGenerator implements SheetGenerator {
                 table = new Table(currentCell);
                 break;
             default:
-                System.err.printf("%s don't have the ability to create tables.%n", getWorkbookType());
+                System.err.printf("%s don't have the ability to createSheet tables.%n", getWorkbookType());
                 break;
         }
         return currentCell;
@@ -164,7 +159,7 @@ public class DefaultSheetGenerator implements SheetGenerator {
                     table.setEndCell(currentCell);
                 break;
             default:
-                System.err.printf("%s don't have the ability to create tables.%n", getWorkbookType());
+                System.err.printf("%s don't have the ability to createSheet tables.%n", getWorkbookType());
                 break;
         }
         return currentCell;
@@ -219,8 +214,8 @@ public class DefaultSheetGenerator implements SheetGenerator {
 //                }
 //            }
 //        }
-        table.setName("Table1");
-        table.setDisplayName("Data_Table");
+        table.setName(xssfSheet.getSheetName()+"_Table1");
+        table.setDisplayName(xssfSheet.getSheetName()+"_Data_Table");
         CTTableStyleInfo tableStyleInfo = ctTable.addNewTableStyleInfo();
         tableStyleInfo.setName(tableStyleString);
         XSSFTableStyleInfo style = (XSSFTableStyleInfo) table.getStyle();

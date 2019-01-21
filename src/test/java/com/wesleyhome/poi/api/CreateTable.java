@@ -18,7 +18,7 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.STTotalsRowFunction.E
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.STTotalsRowFunctionImpl;
 
 /**
- * Demonstrates how to create a simple table using Apache POI.
+ * Demonstrates how to createSheet a simple table using Apache POI.
  */
 public class CreateTable {
 
@@ -39,7 +39,7 @@ public class CreateTable {
             table.setDisplayName("Test_Table");
 
 //            table.sty
-            // For now, create the initial style in a low-level way
+            // For now, createSheet the initial style in a low-level way
 //            table.getCTTable().addNewTableStyleInfo();
 //            table.getCTTable().getTableStyleInfo().setName("TableStyleMedium2");
 

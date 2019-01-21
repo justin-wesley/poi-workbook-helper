@@ -10,8 +10,6 @@ import java.util.function.Function;
 
 public interface SheetGenerator extends WorkbookCreator {
 
-    SheetGenerator generateStyles(Consumer<CellStyler> cellStyler);
-
     SheetGenerator withSheetName(String test_sheet);
 
     /**

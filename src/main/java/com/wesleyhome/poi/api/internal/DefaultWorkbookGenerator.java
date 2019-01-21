@@ -12,6 +12,7 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class DefaultWorkbookGenerator implements WorkbookGenerator {
@@ -72,6 +73,12 @@ public class DefaultWorkbookGenerator implements WorkbookGenerator {
     }
 
     @Override
+    public WorkbookGenerator generateStyles(Consumer<CellStyler> cellStyler) {
+        cellStyler.accept(cellStyler());
+        return this;
+    }
+
+    @Override
     public CellStyler cellStyler() {
         return this.cellStyler;
     }
@@ -81,10 +88,19 @@ public class DefaultWorkbookGenerator implements WorkbookGenerator {
         return this;
     }
 
+
     @Override
     public SheetGenerator sheet(String sheetName) {
         String safeSheetName = WorkbookUtil.createSafeSheetName(sheetName);
         return workingSheet = sheets.computeIfAbsent(safeSheetName, name->new DefaultSheetGenerator(this, name));
+    }
+
+    @Override
+    public SheetGenerator sheet() {
+        if(workingSheet == null) {
+            return sheet("Sheet1");
+        }
+        return workingSheet;
     }
 
     @Override

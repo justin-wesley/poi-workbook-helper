@@ -1,24 +1,11 @@
 package com.wesleyhome.poi.api;
 
-import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.jupiter.api.Test;
 
 import static com.wesleyhome.poi.api.assertions.WorkbookAssert.assertThat;
 import static org.apache.poi.ss.usermodel.IndexedColors.*;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.AreaReference;
-import org.apache.poi.ss.util.CellReference;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFTable;
-import org.apache.poi.xssf.usermodel.XSSFTableStyleInfo;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 class WorkbookGeneratorTest {
 
 //    @Test
@@ -31,7 +18,7 @@ class WorkbookGeneratorTest {
 //            table.setName("Test");
 //            table.setDisplayName("Test_Table");
 //
-//            // For now, create the initial style in a low-level way
+//            // For now, createSheet the initial style in a low-level way
 //            table.getCTTable().addNewTableStyleInfo();
 //            table.getCTTable().getTableStyleInfo().setName("TableStyleMedium2");
 //
@@ -92,12 +79,12 @@ class WorkbookGeneratorTest {
 
     private Workbook getBasicWorkbook() {
         SheetGenerator sheetGenerator = WorkbookGenerator
-            .create()
+            .createNewWorkbook()
             .generateStyles(styler -> styler.withBackgroundColor(DARK_BLUE)
                 .withFontColor(WHITE)
                 .as("base")
                 .withBackgroundColor(RED)
-                .as("red"));
+                .as("red")).sheet();
         return sheetGenerator
             .nextCell()
             .havingValue("I am awesome")
@@ -117,8 +104,8 @@ class WorkbookGeneratorTest {
 
 
 //    @Test
-//    void create() {
-//        Workbook actual = WorkbookGenerator.create()
+//    void createSheet() {
+//        Workbook actual = WorkbookGenerator.createSheet()
 //            .withSheetName("TestSheet").withStartRow(2)
 //                .createNextRow().withStartColumn("B")
 //                    .withNextCell().havingValue("Name").withBackgroundColor(IndexedColors.DARK_BLUE).withFontColor(IndexedColors.WHITE).withBoldFont().as("HEADER")

@@ -6,6 +6,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 
 import static java.lang.String.format;
@@ -17,9 +18,7 @@ public interface WorkbookCreator {
 
     WorkbookGenerator workbook();
 
-    default SheetGenerator sheet(){
-        return sheet("Sheet1");
-    }
+    SheetGenerator sheet();
 
     SheetGenerator sheet(String sheetName);
 

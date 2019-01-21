@@ -12,7 +12,6 @@ public interface RowGenerator extends WorkbookCreator {
         return withStartColumn(convertColStringToIndex(columnName));
     }
 
-
     RowGenerator withStartColumn(int columnNum);
 
     CellGenerator cell(int columnNum);

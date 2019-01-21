@@ -16,9 +16,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.apache.commons.lang3.RandomUtils.nextInt;
+
 class ReportGeneratorTest {
 
-    private ReportGenerator<TestDefaultDataPropertyAccessor> defaultDataReportGenerator = new DefaultReportGenerator<>();
     private static final String URLS[] = {
         "http://www.amazon.com",
         "http://www.cnn.com",
@@ -27,12 +28,36 @@ class ReportGeneratorTest {
 
     @Test
     void testDefaultDataPropertyAccessor() throws Exception{
-        List<TestDefaultDataPropertyAccessor> records = dpa(20);
+        List<TestDefaultDataPropertyAccessor> records = dpa(nextInt(20, 41));
+        ReportConfiguration<TestDefaultDataPropertyAccessor> reportConfiguration = new AnnotatedReportConfiguration<>(TestDefaultDataPropertyAccessor.class);
+        ReportGenerator reportGenerator = new DefaultReportGenerator().applyReport(records, reportConfiguration);
+
         Path testReportDirectory = Paths.get("target", "test", "reports");
         Files.createDirectories(testReportDirectory);
         Path reportPath = Files.createTempFile(testReportDirectory, "DefaultReport", ".xlsx");
-        ReportConfiguration<TestDefaultDataPropertyAccessor> reportConfiguration = new AnnotatedReportConfiguration<>(TestDefaultDataPropertyAccessor.class);
-        try(OutputStream os = Files.newOutputStream(reportPath); Workbook workbook = defaultDataReportGenerator.generateWorkbook(records, reportConfiguration)){
+
+        try(OutputStream os = Files.newOutputStream(reportPath); Workbook workbook = reportGenerator.create()){
+            workbook.write(os);
+        }
+        System.out.println(reportPath.toAbsolutePath());
+        Desktop.getDesktop().open(reportPath.toFile());
+    }
+
+    @Test
+    void testMultipleSheetsDefaultDataPropertyAccessor() throws Exception{
+        ReportConfiguration<TestDefaultDataPropertyAccessor> reportConfiguration = new AnnotatedReportConfiguration<TestDefaultDataPropertyAccessor>(TestDefaultDataPropertyAccessor.class){
+            @Override
+            public String getReportSheetName() {
+                return super.getReportSheetName()+RandomStringUtils.randomAlphabetic(3);
+            }
+        };
+        ReportGenerator reportGenerator = new DefaultReportGenerator()
+            .applyReport(this.dpa(nextInt(20, 41)), reportConfiguration)
+            .applyReport(this.dpa(nextInt(20, 41)), reportConfiguration);
+        Path testReportDirectory = Paths.get("target", "test", "reports");
+        Files.createDirectories(testReportDirectory);
+        Path reportPath = Files.createTempFile(testReportDirectory, "DefaultReport", ".xlsx");
+        try(OutputStream os = Files.newOutputStream(reportPath); Workbook workbook = reportGenerator.create()){
             workbook.write(os);
         }
         System.out.println(reportPath.toAbsolutePath());
@@ -40,7 +65,6 @@ class ReportGeneratorTest {
     }
 
     private List<TestDefaultDataPropertyAccessor> dpa(int numberOfRecords) {
-
         return IntStream.rangeClosed(1, numberOfRecords)
             .boxed()
             .map(this::createDpa)
@@ -48,18 +72,20 @@ class ReportGeneratorTest {
     }
 
     private TestDefaultDataPropertyAccessor createDpa(Integer id) {
-        LocalDate birthdate = LocalDate.now().minusYears(RandomUtils.nextInt(0, 100));
-        LocalDate oldDate = birthdate.minusYears(30);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate localDate = now.toLocalDate();
+        LocalDate birthdate = localDate.minusYears(nextInt(0, 100));
+        LocalDate oldDate = localDate.minusYears(30);
         boolean isOld = oldDate.isAfter(birthdate);
         return TestDefaultDataPropertyAccessor.builder()
             .id(id)
-            .name(RandomStringUtils.randomPrint(6,30))
+            .name(RandomStringUtils.randomAlphabetic(6,30))
             .birthdate(birthdate)
-            .now(LocalDateTime.now())
+            .now(now)
             .old(isOld)
             .averageScore(RandomUtils.nextDouble(56d, 300d))
             .bankBalance(RandomUtils.nextDouble(100d, 100_000d))
-            .website(URLS[RandomUtils.nextInt(0, 2)])
+            .website(URLS[nextInt(0, 2)])
             .build();
     }
 

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-@Report
+@Report(sheetName = "MySheet")
 class TestDefaultDataPropertyAccessor {
 
     @ReportColumn(columnIdentifier = "A")

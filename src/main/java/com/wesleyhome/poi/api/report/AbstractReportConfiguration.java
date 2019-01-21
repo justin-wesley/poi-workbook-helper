@@ -94,7 +94,7 @@ public abstract class AbstractReportConfiguration<T> implements ReportConfigurat
     }
 
     @Override
-    public final String getReportSheetName() {
+    public String getReportSheetName() {
         return this.sheetNameInitializer.get();
     }
 
