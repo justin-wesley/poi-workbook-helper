@@ -9,8 +9,10 @@ import org.apache.poi.xssf.usermodel.XSSFTableStyleInfo;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTTable;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTTableStyleInfo;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class DefaultSheetGenerator implements SheetGenerator {
     private final WorkbookGenerator workbookGenerator;
@@ -20,8 +22,6 @@ public class DefaultSheetGenerator implements SheetGenerator {
     private final ExtendedMap<Integer, DefaultRowGenerator> rows;
     private Set<Integer> autosizeColumns;
     private Set<Integer> hiddenColumns;
-    private Table table;
-    private TableConfiguration tableConfiguration;
 
     public DefaultSheetGenerator(WorkbookGenerator workbookGenerator, String sheetName) {
         this.workbookGenerator = workbookGenerator;
@@ -138,31 +138,12 @@ public class DefaultSheetGenerator implements SheetGenerator {
 
     @Override
     public CellGenerator startTable() {
-        CellGenerator currentCell = this.cell();
-        switch (getWorkbookType()) {
-            case EXCEL_OPEN:
-                table = new Table(currentCell);
-                break;
-            default:
-                System.err.printf("%s don't have the ability to createSheet tables.%n", getWorkbookType());
-                break;
-        }
-        return currentCell;
+        return this.workbookGenerator.startTable();
     }
 
     @Override
     public CellGenerator endTable(TableConfiguration tableConfiguration) {
-        this.tableConfiguration = tableConfiguration;
-        CellGenerator currentCell = this.cell();
-        switch (getWorkbookType()) {
-            case EXCEL_OPEN:
-                    table.setEndCell(currentCell);
-                break;
-            default:
-                System.err.printf("%s don't have the ability to createSheet tables.%n", getWorkbookType());
-                break;
-        }
-        return currentCell;
+        return this.workbookGenerator.endTable(tableConfiguration);
     }
 
 
@@ -172,17 +153,17 @@ public class DefaultSheetGenerator implements SheetGenerator {
     }
 
 
-    public void applySheet(Workbook workbook) {
+    public void applySheet(Workbook workbook, Map<Table, TableConfiguration> tables, AtomicInteger tableCount) {
         Sheet sheet = workbook.createSheet(this.sheetName);
         rows.values()
             .forEach(rowGen -> rowGen.applyRow(sheet));
         autosizeColumns.forEach(colNum -> sheet.autoSizeColumn(colNum, true));
         hiddenColumns.forEach(colNum -> sheet.setColumnHidden(colNum, true));
-        if (this.table != null && this.table.isValid()) {
+        if (!tables.isEmpty()) {
             switch (getWorkbookType()) {
                 case EXCEL_OPEN:
                     XSSFSheet xssfSheet = (XSSFSheet) sheet;
-                    createTable(xssfSheet);
+                    createTable(xssfSheet, tables, tableCount);
                     break;
                 case EXCEL_STREAM:
                 default:
@@ -191,39 +172,42 @@ public class DefaultSheetGenerator implements SheetGenerator {
         }
     }
 
-    private void createTable(XSSFSheet xssfSheet) {
-        TableStyle tableStyle = this.tableConfiguration.getTableStyle();
-        boolean hasTotalRow = this.tableConfiguration.hasTotalRow();
-        XSSFTable table = xssfSheet.createTable(this.table.getAreaReference(false, xssfSheet.getWorkbook()));
-        String tableStyleString = tableStyle.toString();
-        CTTable ctTable = table.getCTTable();
-        ctTable.addNewAutoFilter();
-//        if(hasTotalRow) {
-//            ctTable.setTotalsRowCount(1L);
-//            ctTable.setTotalsRowShown(true);
-//            CTTableColumns tableColumns = ctTable.getTableColumns();
-//            List<CTTableColumn> tableColumnList = tableColumns.getTableColumnList();
-//            ListIterator<CTTableColumn> itr = tableColumnList.listIterator();
-//            List<TotalsRowFunction> totalRowFunctions = this.tableConfiguration.getTotalRowFunctions();
-//            while(itr.hasNext()){
-//                TotalsRowFunction function = totalRowFunctions.get(itr.nextIndex());
-//                CTTableColumn column = itr.next();
-//                if(!TotalsRowFunction.F_NONE.equals(function)) {
-//                    column.setTotalsRowFunction(function.getFunctionEnum());
-//                    column.setT
+    private void createTable(XSSFSheet xssfSheet, Map<Table, TableConfiguration> tables, AtomicInteger tableCount) {
+        tables.forEach(((table1, tableConfiguration) -> {
+            TableStyle tableStyle = tableConfiguration.getTableStyle();
+            boolean hasTotalRow = tableConfiguration.hasTotalRow();
+            XSSFTable table = xssfSheet.createTable(table1.getAreaReference(false, xssfSheet.getWorkbook()));
+            String tableStyleString = tableStyle.toString();
+            CTTable ctTable = table.getCTTable();
+            ctTable.addNewAutoFilter();
+//            if (hasTotalRow) {
+//                ctTable.setTotalsRowCount(1L);
+//                ctTable.setTotalsRowShown(true);
+//                CTTableColumns tableColumns = ctTable.getTableColumns();
+//                List<CTTableColumn> tableColumnList = tableColumns.getTableColumnList();
+//                ListIterator<CTTableColumn> itr = tableColumnList.listIterator();
+//                List<TotalsRowFunction> totalRowFunctions = this.tableConfiguration.getTotalRowFunctions();
+//                while (itr.hasNext()) {
+//                    TotalsRowFunction function = totalRowFunctions.get(itr.nextIndex());
+//                    CTTableColumn column = itr.next();
+//                    if (!TotalsRowFunction.F_NONE.equals(function)) {
+//                        column.setTotalsRowFunction(function.getFunctionEnum());
+//                        column.setT
+//                    }
 //                }
 //            }
-//        }
-        table.setName(this.tableConfiguration.getTableName());
-        table.setDisplayName(this.tableConfiguration.getTableName()+"_Data_Table");
-        CTTableStyleInfo tableStyleInfo = ctTable.addNewTableStyleInfo();
-        tableStyleInfo.setName(tableStyleString);
-        XSSFTableStyleInfo style = (XSSFTableStyleInfo) table.getStyle();
-        style.setShowColumnStripes(false);
-        style.setShowRowStripes(true);
-        style.setFirstColumn(false);
-        style.setLastColumn(false);
-        style.setShowRowStripes(true);
+            table.setName("Table" + tableCount.getAndIncrement());
+            table.setDisplayName(table.getName());
+            CTTableStyleInfo tableStyleInfo = ctTable.addNewTableStyleInfo();
+            tableStyleInfo.setName(tableStyleString);
+            XSSFTableStyleInfo style = (XSSFTableStyleInfo) table.getStyle();
+            style.setShowColumnStripes(false);
+            style.setShowRowStripes(true);
+            style.setFirstColumn(false);
+            style.setLastColumn(false);
+            style.setShowRowStripes(true);
+        }));
+
     }
 
     @Override

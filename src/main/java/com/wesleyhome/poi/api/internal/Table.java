@@ -1,6 +1,7 @@
 package com.wesleyhome.poi.api.internal;
 
 import com.wesleyhome.poi.api.CellGenerator;
+import com.wesleyhome.poi.api.SheetGenerator;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;

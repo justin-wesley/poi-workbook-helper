@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<table id="2" ref="H23:I49" name="Table2" displayName="Table2"
+       xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+    <autoFilter/>
+    <tableColumns count="2">
+        <tableColumn id="1" name="http://www.cnn.com"/>
+        <tableColumn id="2" name="ID"/>
+    </tableColumns>
+    <tableStyleInfo name="TableStyleMedium6" showColumnStripes="false" showRowStripes="true" showFirstColumn="false"
+                    showLastColumn="false"/>
+</table>

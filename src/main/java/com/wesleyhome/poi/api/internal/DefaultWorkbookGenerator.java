@@ -12,6 +12,9 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -37,11 +40,13 @@ public class DefaultWorkbookGenerator implements WorkbookGenerator {
     private ExtendedMap<String, DefaultSheetGenerator> sheets;
     private DefaultSheetGenerator workingSheet;
     private CellStyler cellStyler;
-    private Table table;
+    private Table currentTable;
+    private Map<DefaultSheetGenerator, Map<Table, TableConfiguration>> tables;
 
     public DefaultWorkbookGenerator(WorkbookType workbookType) {
         this.workbookType = workbookType;
         sheets = new ExtendedTreeMap<>();
+        tables = new HashMap<>();
         this.cellStyler = new DefaultCellStyler().withAccountingFormat()
             .as(BuiltinStyles.ACCOUNTING)
             .reset()
@@ -106,10 +111,10 @@ public class DefaultWorkbookGenerator implements WorkbookGenerator {
     @Override
     public Workbook createWorkbook() {
         Workbook workbook = createNewWorkbook();
+
+        AtomicInteger tableCount = new AtomicInteger(1);
         sheets.values()
-            .forEach(sheetGen -> sheetGen.applySheet(workbook));
-//        FormulaEvaluator evaluator = getEvaluator(workbook);
-//        evaluator.evaluateAll();
+            .forEach(sheetGen -> sheetGen.applySheet(workbook, tables.get(sheetGen), tableCount));
         return workbook;
     }
 
@@ -192,11 +197,36 @@ public class DefaultWorkbookGenerator implements WorkbookGenerator {
 
     @Override
     public CellGenerator startTable() {
-        return sheet().startTable();
+        CellGenerator currentCell = this.cell();
+        if (currentTable != null) {
+            System.err.printf("You must end a table before creating a new one");
+        } else {
+            switch (getWorkbookType()) {
+                case EXCEL_OPEN:
+                    currentTable = new Table(currentCell);
+                    break;
+                default:
+                    System.err.printf("%s don't have the ability to createSheet tables.%n", getWorkbookType());
+                    break;
+            }
+        }
+        return currentCell;
     }
 
     @Override
     public CellGenerator endTable(TableConfiguration tableConfiguration) {
-        return sheet().endTable(tableConfiguration);
+        CellGenerator currentCell = this.cell();
+        switch (getWorkbookType()) {
+            case EXCEL_OPEN:
+                currentTable.setEndCell(currentCell);
+                Map<Table, TableConfiguration> tableMap = tables.computeIfAbsent((DefaultSheetGenerator) currentCell.sheet(), (s) -> new HashMap<>());
+                tableMap.put(currentTable, tableConfiguration);
+                currentTable = null;
+                break;
+            default:
+                System.err.printf("%s don't have the ability to createSheet tables.%n", getWorkbookType());
+                break;
+        }
+        return currentCell;
     }
 }

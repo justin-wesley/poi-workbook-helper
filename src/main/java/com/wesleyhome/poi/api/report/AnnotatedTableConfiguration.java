@@ -16,7 +16,6 @@ public class AnnotatedTableConfiguration implements TableConfiguration {
     private final TableStyle tableStyle;
     private final List<TotalsRowFunction> totalsRowFunctions;
     private final boolean hasTotalRow;
-    private final String tableName;
 
     public AnnotatedTableConfiguration(Report reportAnnotation, List<AnnotatedElement> totalsRowFunctions) {
         this.tableStyle = reportAnnotation.tableStyle();
@@ -25,7 +24,6 @@ public class AnnotatedTableConfiguration implements TableConfiguration {
             .map(ReportColumn::totalFunction)
             .collect(Collectors.toList());
         this.hasTotalRow = this.totalsRowFunctions.stream().anyMatch(f -> !TotalsRowFunction.F_NONE.equals(f));
-        this.tableName = reportAnnotation.sheetName()+"Table";
     }
 
     @Override
@@ -43,8 +41,4 @@ public class AnnotatedTableConfiguration implements TableConfiguration {
         return totalsRowFunctions;
     }
 
-    @Override
-    public String getTableName() {
-        return tableName;
-    }
 }

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<recoveryLog xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+    <logFileName>error197760_01.xml</logFileName>
+    <summary>Errors were detected in file
+        'C:\Projects\poi-workbook-helper\target\test\reports\DefaultReport4658688825157691349.xlsx'
+    </summary>
+    <repairedRecords>
+        <repairedRecord>Repaired Records: Table from /xl/tables/table2.xml part (Table)</repairedRecord>
+    </repairedRecords>
+</recoveryLog>

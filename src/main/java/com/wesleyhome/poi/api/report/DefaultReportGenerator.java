@@ -10,6 +10,7 @@ import java.util.*;
 public class DefaultReportGenerator implements ReportGenerator {
 
     private final WorkbookGenerator workbookGenerator;
+    private String currentSheetName;
 
     public DefaultReportGenerator() {
         workbookGenerator = WorkbookGenerator.createNewWorkbook();
@@ -17,7 +18,11 @@ public class DefaultReportGenerator implements ReportGenerator {
 
     @Override
     public <T> ReportGenerator applyReport(Iterable<T> data, ReportConfiguration<T> reportConfiguration) {
+        if(currentSheetName != null && currentSheetName.equals(reportConfiguration.getReportSheetName())){
+            workbookGenerator.sheet(currentSheetName).nextRow().nextRow();
+        }
         generateSheet(data, reportConfiguration);
+        currentSheetName = reportConfiguration.getReportSheetName();
         return this;
     }
 

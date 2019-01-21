@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<table id="1" ref="A2:H23" name="Table1" displayName="Table1"
+       xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+    <autoFilter/>
+    <tableColumns count="8">
+        <tableColumn id="1" name="ID"/>
+        <tableColumn id="2" name="NAME"/>
+        <tableColumn id="3" name="BIRTHDATE"/>
+        <tableColumn id="4" name="NOW"/>
+        <tableColumn id="5" name="OLD"/>
+        <tableColumn id="6" name="AVERAGE SCORE"/>
+        <tableColumn id="7" name="BANK BALANCE"/>
+        <tableColumn id="8" name="WEBSITE"/>
+    </tableColumns>
+    <tableStyleInfo name="TableStyleMedium6" showColumnStripes="false" showRowStripes="true" showFirstColumn="false"
+                    showLastColumn="false"/>
+</table>

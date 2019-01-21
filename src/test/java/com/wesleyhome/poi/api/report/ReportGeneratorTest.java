@@ -13,6 +13,8 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -54,6 +56,35 @@ class ReportGeneratorTest {
         ReportGenerator reportGenerator = new DefaultReportGenerator()
             .applyReport(this.dpa(nextInt(20, 41)), reportConfiguration)
             .applyReport(this.dpa(nextInt(20, 41)), reportConfiguration);
+        Path testReportDirectory = Paths.get("target", "test", "reports");
+        Files.createDirectories(testReportDirectory);
+        Path reportPath = Files.createTempFile(testReportDirectory, "DefaultReport", ".xlsx");
+        try(OutputStream os = Files.newOutputStream(reportPath); Workbook workbook = reportGenerator.create()){
+            workbook.write(os);
+        }
+        System.out.println(reportPath.toAbsolutePath());
+        Desktop.getDesktop().open(reportPath.toFile());
+    }
+
+    @Test
+    void testMultipleTablesDefaultDataPropertyAccessor() throws Exception{
+        AtomicBoolean flagged = new AtomicBoolean(true);
+        ReportConfiguration<TestDefaultDataPropertyAccessor> reportConfiguration = new AnnotatedReportConfiguration<TestDefaultDataPropertyAccessor>(TestDefaultDataPropertyAccessor.class){
+        };
+        ReportGenerator reportGenerator = new DefaultReportGenerator()
+            .applyReport(this.dpa(nextInt(20, 41)), new AnnotatedReportConfiguration<>(TestDefaultDataPropertyAccessor.class))
+            .applyReport(this.dpa(nextInt(20, 41)), new AnnotatedReportConfiguration<TestDefaultDataPropertyAccessor>(TestDefaultDataPropertyAccessor.class){
+
+                @Override
+                protected String initializeReportTitle() {
+                    return null;
+                }
+
+                @Override
+                protected String initializeReportDescription() {
+                    return null;
+                }
+            });
         Path testReportDirectory = Paths.get("target", "test", "reports");
         Files.createDirectories(testReportDirectory);
         Path reportPath = Files.createTempFile(testReportDirectory, "DefaultReport", ".xlsx");
