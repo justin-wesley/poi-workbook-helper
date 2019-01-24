@@ -1,6 +1,5 @@
 package com.wesleyhome.poi.api.report;
 
-import com.wesleyhome.poi.api.TableStyle;
 import com.wesleyhome.poi.api.internal.TableConfiguration;
 import com.wesleyhome.poi.api.report.annotations.Report;
 import com.wesleyhome.poi.api.report.annotations.ReportColumn;
@@ -59,17 +58,17 @@ public class AnnotatedReportConfiguration<T> extends AbstractReportConfiguration
     }
 
     @Override
-    protected SortedMap<String, ColumnConfiguration<T>> initializeColumns() {
+    protected SortedSet<ColumnConfiguration<T>> initializeColumns() {
         List<AbstractAnnotatedColumnConfiguration<T, ? extends AccessibleObject>> columnConfigurations = getAnnotatedColumns();
         AtomicInteger nextColumn = columnConfigurations.stream()
-            .filter(c -> !ReportColumn.NULL.equals(c.getColumnName()))
+            .filter(c -> !ReportColumn.NULL.equals(c.getColumn()))
             .max(Comparator.naturalOrder())
-            .map(AbstractAnnotatedColumnConfiguration::getColumnName)
+            .map(AbstractAnnotatedColumnConfiguration::getColumn)
             .map(CellReference::convertColStringToIndex)
             .map(AtomicInteger::new)
             .orElseGet(() -> new AtomicInteger(CellReference.convertColStringToIndex("A") - 1));
         columnConfigurations.stream()
-            .filter(c -> ReportColumn.NULL.equals(c.getColumnName()))
+            .filter(c -> ReportColumn.NULL.equals(c.getColumn()))
             .forEach(c -> {
                 int nextColumnRow = nextColumn.incrementAndGet();
                 String nextColumnName = CellReference.convertNumToColString(nextColumnRow);
@@ -77,10 +76,7 @@ public class AnnotatedReportConfiguration<T> extends AbstractReportConfiguration
             });
         return columnConfigurations.stream()
             .map(c -> (ColumnConfiguration<T>) c)
-            .collect(collectingAndThen(
-                toMap(ColumnConfiguration::getColumnName, c -> c),
-                TreeMap::new
-            ));
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
     private List<AbstractAnnotatedColumnConfiguration<T, ? extends AccessibleObject>> getAnnotatedColumns() {

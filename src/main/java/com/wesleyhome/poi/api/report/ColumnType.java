@@ -13,5 +13,6 @@ public enum ColumnType {
     TIMESTAMP,
     FRACTION,
     SCI_NOTATION,
+    ZIP,
     BOOLEAN
 }

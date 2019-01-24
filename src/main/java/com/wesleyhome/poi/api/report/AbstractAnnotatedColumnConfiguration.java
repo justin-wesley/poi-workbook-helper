@@ -73,11 +73,6 @@ public abstract class AbstractAnnotatedColumnConfiguration<T, M extends Member &
         return accessorInitializer.get();
     }
 
-    @Override
-    public String getFieldName() {
-        return fieldNameInitializer.get();
-    }
-
     protected String getDefaultHeaderName(){
         return defaultHeaderInitializer.get();
     }
@@ -85,12 +80,12 @@ public abstract class AbstractAnnotatedColumnConfiguration<T, M extends Member &
     protected Function<M, String> getDefaultColumnHeaderNameFunction() {
         return field-> WordUtils.capitalize(CaseFormat.LOWER_CAMEL.to(
             CaseFormat.UPPER_UNDERSCORE,
-            getFieldName()
+            fieldNameInitializer.get()
         ).replace("_", " "));
     }
 
     @Override
-    public String getColumnName() {
+    public String getColumn() {
         return columnName;
     }
 

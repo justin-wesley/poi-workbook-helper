@@ -11,7 +11,7 @@ public interface TableConfiguration {
 
     TableStyle getTableStyle();
 
-    boolean hasTotalRow();
+//    boolean hasTotalRow();
 
     default List<TotalsRowFunction> getTotalRowFunctions() {
         return new ArrayList();

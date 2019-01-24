@@ -4,13 +4,13 @@ import com.wesleyhome.poi.api.CellGenerator;
 import com.wesleyhome.poi.api.CellStyler;
 import com.wesleyhome.poi.api.internal.TableConfiguration;
 
+import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 public interface ReportConfiguration<T> {
-
-    SortedMap<String, ColumnConfiguration<T>> columns();
 
     String getReportSheetName();
 
@@ -26,14 +26,14 @@ public interface ReportConfiguration<T> {
 
     void createStyles(CellStyler cellStyler);
 
-    default ColumnConfiguration<T> getColumnConfiguration(String columnIdentifier) {
-        return columns().get(columnIdentifier);
-    }
+    SortedSet<ColumnConfiguration<T>> columns();
 
-    default Map<String, String> columnHeaders() {
-        return columns().values()
+    default List<String> columnHeaders() {
+        return columns()
             .stream()
-            .collect(Collectors.toMap(ColumnConfiguration::getColumnName, ColumnConfiguration::getColumnHeader));
+            .sorted()
+            .map(ColumnConfiguration::getColumnHeader)
+            .collect(Collectors.toList());
     }
 
     boolean hasReportDescriptionDetails();

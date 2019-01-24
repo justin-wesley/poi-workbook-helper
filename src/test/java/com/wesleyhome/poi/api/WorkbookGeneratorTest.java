@@ -48,7 +48,7 @@ class WorkbookGeneratorTest {
 //                    }
 //                }
 //            }
-//            // Create the columns
+//            // Create the columnMap
 //            table.createColumn("Column 1");
 //            table.createColumn("Column 2");
 //            table.createColumn("Column 3");
@@ -118,7 +118,7 @@ class WorkbookGeneratorTest {
 //                    .withNextCell().havingValue(LocalDate.of(1976, Month.JUNE, 20)).usingStyle("ODD_ROW").withDateTimeFormat()
 //                    .withNextCell().havingValue(42).usingStyle("ODD_ROW").withIntegerFormat()
 //                    .withNextCell().havingValue(142000D).usingStyle("ODD_ROW").withCurrencyFormat()
-//                    .withNextCell().havingValue(352123.54).usingStyle("ODD_ROW").withNumericStyle()
+//                    .withNextCell().havingValue(352123.54).usingStyle("ODD_ROW").withNumericFormat()
 //            .createNewSheet("New Sheet")
 //                .createNextRow()
 //                    .withNextCell().havingValue("Awesome!!!")

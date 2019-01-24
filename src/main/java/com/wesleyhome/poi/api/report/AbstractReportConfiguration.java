@@ -15,14 +15,14 @@ public abstract class AbstractReportConfiguration<T> implements ReportConfigurat
     private final SafeLazyInitializer<String> sheetNameInitializer;
     private final SafeLazyInitializer<String> reportDescriptionInitializer;
     private final SafeLazyInitializer<ReportStyler> reportStylerInitializer;
-    private final SafeLazyInitializer<SortedMap<String, ColumnConfiguration<T>>> columnInitializer;
+    private final SafeLazyInitializer<SortedSet<ColumnConfiguration<T>>> columnInitializer;
     private final SafeLazyInitializer<String> reportTitleInitializer;
     private final SafeLazyInitializer<TableConfiguration> tableConfigurationInitializer;
 
     public AbstractReportConfiguration() {
-        this.columnInitializer = new SafeLazyInitializer<SortedMap<String, ColumnConfiguration<T>>>() {
+        this.columnInitializer = new SafeLazyInitializer<SortedSet<ColumnConfiguration<T>>>() {
             @Override
-            protected SortedMap<String, ColumnConfiguration<T>> safeInitialize() {
+            protected SortedSet<ColumnConfiguration<T>> safeInitialize() {
                 return initializeColumns();
             }
         };
@@ -82,10 +82,10 @@ public abstract class AbstractReportConfiguration<T> implements ReportConfigurat
 
     protected abstract ReportStyler initializeReportStyler();
 
-    protected abstract SortedMap<String, ColumnConfiguration<T>> initializeColumns();
+    protected abstract SortedSet<ColumnConfiguration<T>> initializeColumns();
 
     @Override
-    public final SortedMap<String, ColumnConfiguration<T>> columns() {
+    public final SortedSet<ColumnConfiguration<T>> columns() {
         return this.columnInitializer.get();
     }
 
@@ -110,7 +110,8 @@ public abstract class AbstractReportConfiguration<T> implements ReportConfigurat
 
     @Override
     public boolean hasReportDescriptionDetails() {
-        return !Objects.equals(this.reportDescriptionInitializer.get(), this.reportTitleInitializer.get());
+        String reportDescription = this.reportDescriptionInitializer.get();
+        return reportDescription != null && !Objects.equals(reportDescription, this.reportTitleInitializer.get());
     }
 
     @Override
@@ -119,7 +120,6 @@ public abstract class AbstractReportConfiguration<T> implements ReportConfigurat
     }
 
     public CellGenerator applyStyleAndValueToCell(CellGenerator cellGenerator, ColumnConfiguration<T> columnConfiguration, Object transformedValue) {
-        int rowNum = cellGenerator.rowNum();
         List<String> styles = new ArrayList<>();
         ColumnType columnType = columnConfiguration.getColumnType();
         if (ColumnType.DERIVED.equals(columnType) && transformedValue != null) {
@@ -149,6 +149,9 @@ public abstract class AbstractReportConfiguration<T> implements ReportConfigurat
                 break;
             case INTEGER:
                 styles.add(INTEGER);
+                break;
+            case ZIP:
+                styles.add(ZIP);
                 break;
             case TEXT:
             case URL:

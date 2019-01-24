@@ -18,14 +18,14 @@ import static org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND;
 
 public class CellStyleManager {
 
-    private ExtendedMap<String, CellStyler> cellStylerMap;
+    private Map<String, CellStyler> cellStylerMap;
     //    private ExtendedMap<String, ExtendedCellStyle> styleMap;
-    private ExtendedMap<Workbook, Map<ExtendedCellStyle, CellStyle>> cellStyles;
+    private Map<Workbook, Map<ExtendedCellStyle, CellStyle>> cellStyles;
 
     CellStyleManager() {
 //        styleMap = new ExtendedTreeMap<>();
-        cellStylerMap = new ExtendedTreeMap<>();
-        cellStyles = new ExtendedTreeMap<>(comparingInt(Object::hashCode));
+        cellStylerMap = new HashMap<>();
+        cellStyles = new HashMap<>();
     }
 
     CellStyler get(String cellStyle) {

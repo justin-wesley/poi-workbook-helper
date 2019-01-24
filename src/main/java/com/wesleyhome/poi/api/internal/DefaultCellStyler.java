@@ -11,6 +11,12 @@ public class DefaultCellStyler implements CellStyler {
 
     private static final CellStyleManager cellStyleManager = new CellStyleManager();
     public static final String DEFAULT_STYLE_NAME = "DEFAULT_STYLE_NAME";
+    public static final String CURRENCY_FORMAT = "\"$\"#,##0_);(\"$\"#,##0)";
+    public static final String DATE_FORMAT = "m/d/yy";
+    public static final String DATE_TIME_FORMAT = "m/d/yy h:mm AM/PM";
+    public static final String NUMERIC_FORMAT = "#,##0.00";
+    public static final String ACCOUNTING_FORMAT = "_(\"$\"* #,##0.00_);_(\"$\"* (#,##0.00);_(\"$\"* \"-\"??_);_(@_)";
+    public static final String ZIP_FORMAT = "00000-0000";
     private ExtendedCellStyle currentCellStyle;
     private String styleName;
 
@@ -52,12 +58,12 @@ public class DefaultCellStyler implements CellStyler {
 
     @Override
     public CellStyler withDateTimeFormat() {
-        return applyFormat("m/d/yy h:mm AM/PM");
+        return applyFormat(DATE_TIME_FORMAT);
     }
 
     @Override
     public CellStyler withDateFormat() {
-        return applyFormat("m/d/yy");
+        return applyFormat(DATE_FORMAT);
     }
 
     @Override
@@ -67,17 +73,22 @@ public class DefaultCellStyler implements CellStyler {
 
     @Override
     public CellStyler withCurrencyFormat() {
-        return applyFormat("\"$\"#,##0_);(\"$\"#,##0)");
+        return applyFormat(CURRENCY_FORMAT);
     }
 
     @Override
-    public CellStyler withNumericStyle() {
-        return applyFormat("#,##0.00");
+    public CellStyler withNumericFormat() {
+        return applyFormat(NUMERIC_FORMAT);
+    }
+
+    @Override
+    public CellStyler withZipCodeFormat() {
+        return applyFormat(ZIP_FORMAT);
     }
 
     @Override
     public CellStyler withAccountingFormat() {
-        return applyFormat("_(\"$\"* #,##0.00_);_(\"$\"* (#,##0.00);_(\"$\"* \"-\"??_);_(@_)");
+        return applyFormat(ACCOUNTING_FORMAT);
     }
 
     @Override

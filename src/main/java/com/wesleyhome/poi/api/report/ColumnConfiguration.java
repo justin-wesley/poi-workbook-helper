@@ -17,16 +17,16 @@ public interface ColumnConfiguration<T> extends Comparable<ColumnConfiguration<T
 
     Function<T, Object> getAccessor();
 
-    String getFieldName();
+//    String getFieldName();
 
-    String getColumnName();
+    String getColumn();
 
     ColumnType getColumnType();
 
     @Override
     default int compareTo(ColumnConfiguration<T> that){
-        String thisColumnName = this.getColumnName();
-        String thatColumnName = that.getColumnName();
+        String thisColumnName = this.getColumn();
+        String thatColumnName = that.getColumn();
         int nameCompare = thisColumnName.compareTo(thatColumnName);
         if(nameCompare == 0){
             return 0;

@@ -32,11 +32,6 @@ public class AnnotatedTableConfiguration implements TableConfiguration {
     }
 
     @Override
-    public boolean hasTotalRow() {
-        return hasTotalRow;
-    }
-
-    @Override
     public List<TotalsRowFunction> getTotalRowFunctions() {
         return totalsRowFunctions;
     }

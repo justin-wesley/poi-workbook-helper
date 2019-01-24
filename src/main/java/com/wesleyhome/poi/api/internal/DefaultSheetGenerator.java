@@ -1,6 +1,7 @@
 package com.wesleyhome.poi.api.internal;
 
 import com.wesleyhome.poi.api.*;
+import com.wesleyhome.poi.api.report.annotations.TotalsRowFunction;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -9,9 +10,7 @@ import org.apache.poi.xssf.usermodel.XSSFTableStyleInfo;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTTable;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTTableStyleInfo;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class DefaultSheetGenerator implements SheetGenerator {
@@ -19,14 +18,14 @@ public class DefaultSheetGenerator implements SheetGenerator {
     private String sheetName;
     private RowGenerator workingRow;
     private int startRowNum = 0;
-    private final ExtendedMap<Integer, DefaultRowGenerator> rows;
+    private final SortedMap<Integer, DefaultRowGenerator> rows;
     private Set<Integer> autosizeColumns;
     private Set<Integer> hiddenColumns;
 
     public DefaultSheetGenerator(WorkbookGenerator workbookGenerator, String sheetName) {
         this.workbookGenerator = workbookGenerator;
         this.sheetName = sheetName;
-        this.rows = new ExtendedTreeMap<>();
+        this.rows = new TreeMap<>();
         this.autosizeColumns = new TreeSet<>();
         this.hiddenColumns = new TreeSet<>();
     }
@@ -175,7 +174,9 @@ public class DefaultSheetGenerator implements SheetGenerator {
     private void createTable(XSSFSheet xssfSheet, Map<Table, TableConfiguration> tables, AtomicInteger tableCount) {
         tables.forEach(((table1, tableConfiguration) -> {
             TableStyle tableStyle = tableConfiguration.getTableStyle();
-            boolean hasTotalRow = tableConfiguration.hasTotalRow();
+            boolean hasTotalRow = tableConfiguration.getTotalRowFunctions()
+                .stream()
+                .anyMatch(f-> !TotalsRowFunction.F_NONE.equals(f));
             XSSFTable table = xssfSheet.createTable(table1.getAreaReference(false, xssfSheet.getWorkbook()));
             String tableStyleString = tableStyle.toString();
             CTTable ctTable = table.getCTTable();

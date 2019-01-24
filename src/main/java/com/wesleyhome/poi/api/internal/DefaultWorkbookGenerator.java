@@ -13,6 +13,7 @@ import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -30,6 +31,7 @@ public class DefaultWorkbookGenerator implements WorkbookGenerator {
         String WRAPPED_TEXT = "WRAPPED_TEXT";
         String BOLD = "BOLD";
         String DATE = "DATE";
+        String ZIP = "ZIP";
 
         static String alignName(HorizontalAlignment ha) {
             return ha.name()+"_H_ALIGN";
@@ -37,7 +39,7 @@ public class DefaultWorkbookGenerator implements WorkbookGenerator {
     }
 
     private final WorkbookType workbookType;
-    private ExtendedMap<String, DefaultSheetGenerator> sheets;
+    private Map<String, DefaultSheetGenerator> sheets;
     private DefaultSheetGenerator workingSheet;
     private CellStyler cellStyler;
     private Table currentTable;
@@ -45,7 +47,7 @@ public class DefaultWorkbookGenerator implements WorkbookGenerator {
 
     public DefaultWorkbookGenerator(WorkbookType workbookType) {
         this.workbookType = workbookType;
-        sheets = new ExtendedTreeMap<>();
+        sheets = new LinkedHashMap<>();
         tables = new HashMap<>();
         this.cellStyler = new DefaultCellStyler().withAccountingFormat()
             .as(BuiltinStyles.ACCOUNTING)
@@ -65,7 +67,7 @@ public class DefaultWorkbookGenerator implements WorkbookGenerator {
             .withNoBackgroundColor()
             .as(BuiltinStyles.NO_BACKGROUND_COLOR)
             .reset()
-            .withNumericStyle()
+            .withNumericFormat()
             .as(BuiltinStyles.NUMERIC)
             .reset()
             .withWrappedText()
@@ -73,6 +75,9 @@ public class DefaultWorkbookGenerator implements WorkbookGenerator {
             .reset()
             .withBoldFont()
             .as(BuiltinStyles.BOLD)
+            .reset()
+            .withZipCodeFormat()
+            .as(BuiltinStyles.ZIP)
             .reset()
             .applyEach(HorizontalAlignment.values(), (cs, ha)->cs.withHorizontalAlignment(ha).as(BuiltinStyles.alignName(ha)));
     }

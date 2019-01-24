@@ -23,7 +23,9 @@ public interface CellStyler {
 
     CellStyler withCurrencyFormat();
 
-    CellStyler withNumericStyle();
+    CellStyler withNumericFormat();
+
+    CellStyler withZipCodeFormat();
 
     CellStyler withAccountingFormat();
 
