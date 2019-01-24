@@ -119,25 +119,9 @@ public class DefaultWorkbookGenerator implements WorkbookGenerator {
 
         AtomicInteger tableCount = new AtomicInteger(1);
         sheets.values()
-            .forEach(sheetGen -> sheetGen.applySheet(workbook, tables.get(sheetGen), tableCount));
+            .forEach(sheetGen -> sheetGen.applySheet(workbook, tables.computeIfAbsent(sheetGen, sg->new HashMap<>()), tableCount));
         return workbook;
     }
-
-    private FormulaEvaluator getEvaluator(Workbook workbook) {
-        switch (workbookType){
-            case EXCEL_BIN:
-                return new HSSFFormulaEvaluator((HSSFWorkbook) workbook);
-            case EXCEL_OPEN:
-            default:
-                return new XSSFFormulaEvaluator((XSSFWorkbook) workbook);
-            case EXCEL_STREAM:
-                return new SXSSFFormulaEvaluator((SXSSFWorkbook) workbook);
-        }
-    }
-
-
-//    private void evaluateFormula(Workbook workbook) {
-//    }
 
     private Workbook createNewWorkbook() {
         switch (this.workbookType) {
