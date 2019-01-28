@@ -59,6 +59,15 @@ public abstract class AbstractReportConfiguration<T> implements ReportConfigurat
     }
 
     @Override
+    public ColumnConfiguration<T> getColumnConfiguration(String propertyName) {
+        return columns()
+            .stream()
+            .filter(c->c.getPropertyName().equals(propertyName))
+            .findFirst()
+            .orElseThrow(()->new IllegalArgumentException("Cannot find Property Name "+propertyName));
+    }
+
+    @Override
     public TableConfiguration getTableConfiguration() {
         return this.tableConfigurationInitializer.get();
     }
@@ -153,8 +162,10 @@ public abstract class AbstractReportConfiguration<T> implements ReportConfigurat
             case ZIP:
                 styles.add(ZIP);
                 break;
-            case TEXT:
             case URL:
+                styles.add(URL);
+                break;
+            case TEXT:
             case FORMULA:
             case CURRENCY:
             case FRACTION:

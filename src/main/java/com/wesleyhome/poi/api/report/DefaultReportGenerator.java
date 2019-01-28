@@ -33,17 +33,17 @@ public class DefaultReportGenerator implements ReportGenerator {
 
     private <T> SheetGenerator generateSheet(Iterable<T> data, ReportConfiguration<T> reportConfiguration) {
         List<String> columnHeaders = reportConfiguration.columnHeaders();
-        SortedSet<ColumnConfiguration<T>> columns = reportConfiguration.columns();
+        SortedSet<ColumnConfiguration<T>> displayedColumns = reportConfiguration.displayedColumns();
         return workbookGenerator.generateStyles(reportConfiguration::createStyles)
             .sheet(reportConfiguration.getReportSheetName())
             .nextCell()
             .applyIf(reportConfiguration.getReportTitle() != null, cg-> cg.usingStyle(reportConfiguration.getReportTitleStyleName())
-                .mergeWithNextXCells(columns.size()-1)
+                .mergeWithNextXCells(displayedColumns.size()-1)
                 .havingValue(reportConfiguration.getReportTitle())
                 .nextRow().nextCell())
             .applyIf(reportConfiguration.hasReportDescriptionDetails(), cg->
                 cg.usingStyle(reportConfiguration.getReportDescriptionDetailStyleName())
-                    .mergeWithNextXCells(columns.size()-1)
+                    .mergeWithNextXCells(displayedColumns.size()-1)
                     .havingValue(reportConfiguration.getReportDescriptionDetail())
                     .nextRow().nextCell()
             )
@@ -51,7 +51,7 @@ public class DefaultReportGenerator implements ReportGenerator {
             .startTable()
             .generateCells(columnHeaders, ((cellGenerator, headerName) -> cellGenerator.autosize().havingValue(headerName))).nextRow()
             .generateRows(data, ((rowGenerator, value) -> rowGenerator
-                .generateCells(columns, ((cellGenerator, columnConfiguration) -> this.generateValueCell(cellGenerator, columnConfiguration, reportConfiguration, value)))
+                .generateCells(displayedColumns, ((cellGenerator, columnConfiguration) -> this.generateValueCell(cellGenerator, columnConfiguration, reportConfiguration, value)))
                 .row()))
             .endTable(reportConfiguration.getTableConfiguration())
             .sheet();

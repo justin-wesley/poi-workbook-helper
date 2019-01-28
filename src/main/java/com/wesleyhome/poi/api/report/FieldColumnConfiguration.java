@@ -7,8 +7,8 @@ import java.util.function.Function;
 
 public class FieldColumnConfiguration<T> extends AbstractAnnotatedColumnConfiguration<T, Field> {
 
-    public FieldColumnConfiguration(Field field) {
-        super(field);
+    public FieldColumnConfiguration(Field field, ReportConfiguration<T> reportConfiguration) {
+        super(field, reportConfiguration);
     }
 
     @Override
@@ -24,7 +24,7 @@ public class FieldColumnConfiguration<T> extends AbstractAnnotatedColumnConfigur
     }
 
     @Override
-    protected Function<Field, String> getFieldNameFunction() {
+    protected Function<Field, String> getPropertyNameFunction() {
         return Field::getName;
     }
 

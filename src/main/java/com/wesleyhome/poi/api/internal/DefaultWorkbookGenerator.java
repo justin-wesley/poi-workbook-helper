@@ -5,6 +5,7 @@ import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.streaming.SXSSFFormulaEvaluator;
@@ -32,6 +33,7 @@ public class DefaultWorkbookGenerator implements WorkbookGenerator {
         String BOLD = "BOLD";
         String DATE = "DATE";
         String ZIP = "ZIP";
+        String URL = "URL";
 
         static String alignName(HorizontalAlignment ha) {
             return ha.name()+"_H_ALIGN";
@@ -78,6 +80,10 @@ public class DefaultWorkbookGenerator implements WorkbookGenerator {
             .reset()
             .withZipCodeFormat()
             .as(BuiltinStyles.ZIP)
+            .reset()
+            .withUnderline()
+            .withFontColor(IndexedColors.BLUE)
+            .as(BuiltinStyles.URL)
             .reset()
             .applyEach(HorizontalAlignment.values(), (cs, ha)->cs.withHorizontalAlignment(ha).as(BuiltinStyles.alignName(ha)));
     }

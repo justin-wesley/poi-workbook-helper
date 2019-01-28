@@ -11,8 +11,8 @@ import java.util.stream.Stream;
 
 public class MethodColumnConfiguration<T> extends AbstractAnnotatedColumnConfiguration<T, Method> {
 
-    public MethodColumnConfiguration(Method annotatedElement) {
-        super(annotatedElement);
+    public MethodColumnConfiguration(Method annotatedElement, ReportConfiguration<T> reportConfiguration) {
+        super(annotatedElement, reportConfiguration);
     }
 
     @Override
@@ -28,7 +28,7 @@ public class MethodColumnConfiguration<T> extends AbstractAnnotatedColumnConfigu
     }
 
     @Override
-    protected Function<Method, String> getFieldNameFunction() {
+    protected Function<Method, String> getPropertyNameFunction() {
         return method -> {
             try {
                 return Stream.of(Introspector.getBeanInfo(method.getDeclaringClass()).getPropertyDescriptors())

@@ -23,4 +23,8 @@ public @interface ReportColumn {
     TotalsRowFunction totalFunction() default TotalsRowFunction.F_NONE;
 
     Class<? extends Function<?, ?>> formatter() default IdentityFormatter.class;
+
+    String urlFormattingText() default NULL;
+
+    boolean display() default true;
 }

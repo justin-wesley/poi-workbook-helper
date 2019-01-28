@@ -28,6 +28,8 @@ class TestDefaultDataPropertyAccessor {
     private Double averageScore;
     @ReportColumn(columnIdentifier = "G", totalFunction = TotalsRowFunction.F_AVERAGE)
     private Double bankBalance;
-    @ReportColumn(columnIdentifier = "H")
-    private String website;
+    @ReportColumn(display=false)
+    private String searchEngineSite;
+    @ReportColumn(columnIdentifier = "H", columnType = ColumnType.URL, urlFormattingText = "${searchEngineSite}${this}")
+    private String searchTerm;
 }

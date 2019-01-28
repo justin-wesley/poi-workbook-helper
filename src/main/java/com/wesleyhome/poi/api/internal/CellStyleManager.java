@@ -112,6 +112,7 @@ public class CellStyleManager {
             VerticalAlignment verticalAlignment = ecs.getVerticalAlignment();
             boolean bold = ecs.isBold();
             boolean italic = ecs.isItalic();
+            boolean underline = ecs.isUnderline();
             boolean wrappedText = ecs.isWrappedText();
             setProperty(cellStyle, backgroundColor, IndexedColors::getIndex, this::applyBackgroundColor);
             setProperty(verticalAlignment, cellStyle::setVerticalAlignment);
@@ -125,6 +126,9 @@ public class CellStyleManager {
                 setProperty(fontName, font::setFontName);
                 font.setBold(bold);
                 font.setItalic(italic);
+                if(underline) {
+                    font.setUnderline(Font.U_SINGLE);
+                }
                 cellStyle.setFont(font);
             }
             return cellStyle;

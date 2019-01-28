@@ -164,6 +164,11 @@ public class DefaultCellStyler implements CellStyler {
         return applyCellStyle(ExtendedCellStyle::withoutWrappedText);
     }
 
+    @Override
+    public CellStyler withUnderline() {
+        return applyCellStyle(ExtendedCellStyle::withUnderline);
+    }
+
     private CellStyler applyFormat(String fmt) {
 
         return applyCellStyle(ecs -> {

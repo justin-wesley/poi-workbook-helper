@@ -102,4 +102,6 @@ public interface CellStyler {
             .forEach(v-> biConsumer.accept(this.reset(), v));
         return this;
     }
+
+    CellStyler withUnderline();
 }

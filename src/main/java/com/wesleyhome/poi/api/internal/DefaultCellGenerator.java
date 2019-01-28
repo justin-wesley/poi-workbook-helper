@@ -1,6 +1,7 @@
 package com.wesleyhome.poi.api.internal;
 
 import com.wesleyhome.poi.api.*;
+import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -35,6 +36,7 @@ public class DefaultCellGenerator implements CellGenerator, Comparable<DefaultCe
         TIMESTAMP,
         BOOLEAN,
         INTEGER,
+        URL,
         //        CURRENCY,
         NUMERIC,
         STRING,
@@ -99,6 +101,9 @@ public class DefaultCellGenerator implements CellGenerator, Comparable<DefaultCe
                 case BOOLEAN:
                     checkCellType(cellValue.getClass(), cellValue instanceof Boolean || cellValue instanceof String);
                     break;
+                case URL:
+                    checkCellType(cellValue.getClass(), cellValue instanceof Hyperlink);
+                    break;
                 case FORMULA:
                 case STRING:
                     break;
@@ -114,6 +119,8 @@ public class DefaultCellGenerator implements CellGenerator, Comparable<DefaultCe
                 this.cellType = DATE;
             } else if (cellValue instanceof Boolean) {
                 this.cellType = BOOLEAN;
+            } else if(cellValue instanceof Hyperlink) {
+                this.cellType = URL;
             } else {
                 this.cellType = GeneratorCellType.STRING;
             }
@@ -377,6 +384,9 @@ public class DefaultCellGenerator implements CellGenerator, Comparable<DefaultCe
                     cell.setCellType(CellType.BOOLEAN);
                     cell.setCellValue(getBooleanValue());
                     break;
+                case URL:
+                    applyHyperlink(cell);
+                    break;
                 default:
                     cell.setCellType(CellType.STRING);
                     cell.setCellValue(cellValue.toString());
@@ -394,6 +404,19 @@ public class DefaultCellGenerator implements CellGenerator, Comparable<DefaultCe
             this.cellStyler.applyCellStyle(cellRangeAddress, sheet, this.cellStyleName);
         } else {
             this.cellStyler.applyCellStyle(cell, this.cellStyleName);
+        }
+    }
+
+    private void applyHyperlink(Cell cell) {
+        org.apache.poi.ss.usermodel.Hyperlink hyperlink = cell.getRow().getSheet().getWorkbook().getCreationHelper().createHyperlink(HyperlinkType.URL);
+        if (cellValue instanceof Hyperlink) {
+            Hyperlink value = (Hyperlink) cellValue;
+            String url = value.getUrl().replace(" ", "+");
+            hyperlink.setAddress(url);
+            cell.setHyperlink(hyperlink);
+            cell.setCellValue(value.getLinkText());
+        }else{
+            throw new IllegalArgumentException("URL Cells must be Hyperlink type");
         }
     }
 

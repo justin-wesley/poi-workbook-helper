@@ -43,6 +43,7 @@ public class ExtendedCellStyle {
     private boolean wrappedText;
     private VerticalAlignment verticalAlignment;
     private boolean immutable;
+    private boolean underline;
 
     ExtendedCellStyle withHorizontalAlignment(HorizontalAlignment horizontalAlignment) {
         return checkImmutable(t -> this.horizontalAlignment = horizontalAlignment);
@@ -122,6 +123,12 @@ public class ExtendedCellStyle {
         return checkImmutable(t -> t.italic = true);
     }
 
+
+    public ExtendedCellStyle withUnderline() {
+        return checkImmutable(t->t.underline = true);
+    }
+
+
     ExtendedCellStyle withoutBold() {
         return checkImmutable(t -> t.bold = false);
     }
@@ -171,6 +178,7 @@ public class ExtendedCellStyle {
             .applyIf(b::fontName, c::getFontName)
             .applyIf(b::horizontalAlignment, c::getHorizontalAlignment)
             .applyIf(b::italic, c::isItalic)
+            .applyIf(b::underline, c::isUnderline)
             .applyIf(b::leftBorderColor, c::getLeftBorderColor)
             .applyIf(b::leftBorderStyle, c::getLeftBorderStyle)
             .applyIf(b::rightBorderColor, c::getRightBorderColor)

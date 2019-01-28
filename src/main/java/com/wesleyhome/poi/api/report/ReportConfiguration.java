@@ -28,9 +28,12 @@ public interface ReportConfiguration<T> {
 
     SortedSet<ColumnConfiguration<T>> columns();
 
+    ColumnConfiguration<T> getColumnConfiguration(String propertyName);
+
     default List<String> columnHeaders() {
         return columns()
             .stream()
+            .filter(ColumnConfiguration::isDisplayed)
             .sorted()
             .map(ColumnConfiguration::getColumnHeader)
             .collect(Collectors.toList());
@@ -39,4 +42,11 @@ public interface ReportConfiguration<T> {
     boolean hasReportDescriptionDetails();
 
     TableConfiguration getTableConfiguration();
+
+    default SortedSet<ColumnConfiguration<T>> displayedColumns() {
+        return columns()
+            .stream()
+            .filter(ColumnConfiguration::isDisplayed)
+            .collect(Collectors.toCollection(TreeSet::new));
+    };
 }

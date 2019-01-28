@@ -7,21 +7,18 @@ import java.util.function.Function;
 import static org.apache.poi.ss.util.CellReference.convertColStringToIndex;
 
 public interface ColumnConfiguration<T> extends Comparable<ColumnConfiguration<T>>{
+
+    boolean isDisplayed();
+
     String getColumnHeader();
 
-    Function<Object, Object> getTypeTransformer();
-
-    default Object getColumnValue(T value) {
-        return getTypeTransformer().apply(getAccessor().apply(value));
-    }
-
-    Function<T, Object> getAccessor();
-
-//    String getFieldName();
+    Object getColumnValue(T value) ;
 
     String getColumn();
 
     ColumnType getColumnType();
+
+    String getPropertyName();
 
     @Override
     default int compareTo(ColumnConfiguration<T> that){

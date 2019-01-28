@@ -82,7 +82,7 @@ public class AnnotatedReportConfiguration<T> extends AbstractReportConfiguration
     private List<AbstractAnnotatedColumnConfiguration<T, ? extends AccessibleObject>> getAnnotatedColumns() {
         return ReflectionHelper.getAnnotatedMembers(reportClass, ReportColumn.class)
                 .stream()
-                .map(member -> member instanceof Field ? new FieldColumnConfiguration<T>((Field) member) : new MethodColumnConfiguration<T>((Method) member))
+                .map(member -> member instanceof Field ? new FieldColumnConfiguration<>((Field) member, this) : new MethodColumnConfiguration<>((Method) member, this))
                 .sorted()
                 .collect(Collectors.toList());
     }
