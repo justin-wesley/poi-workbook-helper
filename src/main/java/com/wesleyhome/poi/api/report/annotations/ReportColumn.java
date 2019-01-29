@@ -13,6 +13,7 @@ import java.util.function.Function;
 public @interface ReportColumn {
 
     String NULL = "__NULL__";
+    String THIS = "${this}";
 
     String columnHeader() default NULL;
 
